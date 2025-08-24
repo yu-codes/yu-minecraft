@@ -259,13 +259,13 @@ EOF
 optimize_jvm_settings() {
     echo "🔧 最佳化JVM設定..."
     
-    local compose_file="$(dirname "$0")/../docker/docker compose.yml"
+    local compose_file="$(dirname "$0")/../docker/docker-compose.yml"
     local backup_compose="$compose_file.backup.$(date +%Y%m%d_%H%M%S)"
     
     if [ -f "$compose_file" ]; then
         # 備份原始配置
         cp "$compose_file" "$backup_compose"
-        log_optimization "已備份docker compose.yml到 $backup_compose"
+        log_optimization "已備份docker-compose.yml到 $backup_compose"
         
         # 檢查記憶體設定
         local memory_setting=$(grep "MEMORY=" "$(dirname "$0")/../.env" | cut -d'=' -f2 || echo "2G")
@@ -309,7 +309,7 @@ optimize_jvm_settings() {
             log_optimization "Dockerfile JVM參數已最佳化"
         fi
     else
-        echo "❌ 找不到docker compose.yml檔案"
+        echo "❌ 找不到docker-compose.yml檔案"
         return 1
     fi
 }

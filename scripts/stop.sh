@@ -11,9 +11,9 @@ echo "🛑 停止 Yu Minecraft 伺服器..."
 # 切換到專案目錄
 cd "$(dirname "$0")/.."
 
-# 檢查docker compose.yml是否存在
-if [ ! -f "docker/docker compose.yml" ]; then
-    echo "❌ 錯誤: docker compose.yml檔案不存在"
+# 檢查docker-compose.yml是否存在
+if [ ! -f "docker/docker-compose.yml" ]; then
+    echo "❌ 錯誤: docker-compose.yml檔案不存在"
     exit 1
 fi
 
