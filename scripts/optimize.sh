@@ -68,7 +68,7 @@ create_optimized_spigot_config() {
     
     cat > "$spigot_config" << 'EOF'
 # Spigot Configuration File
-# 由Yu Minecraft效能最佳化腳本生成
+# 由Yu Minecraft效能最佳化腳本生成 (1.21.8 Compatible)
 
 config-version: 12
 
@@ -85,6 +85,8 @@ settings:
   restart-on-crash: true
   restart-script: ./start.sh
   netty-threads: 4
+  log-villager-deaths: true
+  log-named-deaths: true
   attribute:
     maxHealth:
       max: 2048.0

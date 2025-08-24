@@ -13,9 +13,9 @@ RUN apt-get update && \
 RUN useradd -m -u 1000 minecraft && \
     chown minecraft:minecraft /minecraft
 
-# 下載Minecraft伺服器jar檔案
-ARG MC_VERSION=1.20.1
-RUN wget -O server.jar https://launcher.mojang.com/v1/objects/84194a2f286ef7c14ed7ce0090dba59902951553/server.jar
+# 下載Minecraft伺服器jar檔案 (1.21.8版本)
+ARG MC_VERSION=1.21.8
+RUN wget -O server.jar https://piston-data.mojang.com/v1/objects/59353fb40c36d304f2035d51e7d6e6baa98dc05c/server.jar
 
 # 複製配置檔案
 COPY config/ ./
