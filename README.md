@@ -242,72 +242,81 @@ yu-minecraft/
 
 ### 外網連線設定
 
-#### 方法一：路由器端口轉發（推薦）
+#### 方法一：固定 IP 連線（最直接）
 
-1. **登入路由器管理界面**：
-   - 通常是 `192.168.1.1` 或 `192.168.0.1`
-   - 使用管理員帳號密碼登入
+適用於有固定公網 IP 或使用 VPS/雲端伺服器的用戶。
 
-2. **設定端口轉發**：
-   - 找到「端口轉發」或「虛擬伺服器」設定
-   - 添加規則：
-     - 服務名稱：Minecraft Server
-     - 內部 IP：你的電腦內網 IP
-     - 內部端口：25565
-     - 外部端口：25565
-     - 協議：TCP
+```bash
+# 自動設置固定 IP 連線（包含防火牆配置）
+./scripts/remote-connect-fixed-ip.sh
+```
 
-3. **取得公網 IP**：
+**適用場景**：
+- 有固定公網 IP 的家用網路
+- VPS/雲端伺服器部署
+- 可以控制路由器設定的環境
 
-   ```bash
-   curl ifconfig.me
-   ```
+**優點**：
+- 最佳效能和穩定性
+- 無第三方服務依賴
+- 完全掌控連線品質
 
-4. **朋友連線方式**：
-   - 伺服器地址：`你的公網IP:25565`
+---
 
-#### 方法二：使用 ngrok（簡單但有限制）
+#### 方法二：使用 ngrok（推薦）
 
-1. **安裝 ngrok**：
+ngrok 是業界標準的隧道服務，穩定可靠。
 
-   ```bash
-   # 到 https://ngrok.com 註冊並下載
-   # 或使用 Homebrew (macOS)
-   brew install ngrok/ngrok/ngrok
-   ```
+```bash
+# 一鍵設置 ngrok
+./scripts/remote-connect-ngrok.sh
+```
 
-2. **設置 ngrok**：
+**📋 詳細設置指南**: 請參考 [`NGROK_SETUP_GUIDE.md`](./NGROK_SETUP_GUIDE.md)
 
-   ```bash
-   # 使用你的 authtoken
-   ngrok config add-authtoken <your-authtoken>
-   ```
+包含完整的註冊、信用卡綁定、authtoken 設置等步驟說明。
 
-3. **啟動隧道**：
+**優點**：
+- 業界標準，穩定可靠
+- 支援流量監控
+- 可升級獲得固定網址
+- 安全性高，使用 TLS 加密
 
-   ```bash
-   ngrok tcp 25565
-   ```
+**注意**：免費版需要綁定信用卡（不扣款），每月 1GB 免費流量
 
-4. **取得連線地址**：
-   - ngrok 會顯示類似：`0.tcp.ngrok.io:12345`
-   - 這就是朋友的連線地址
+---
 
-#### 方法三：使用 Tailscale（推薦給技術用戶）
+#### 方法三：其他免費選項
 
-1. **安裝 Tailscale**：
+如果不想綁定信用卡，可以使用這些完全免費的替代方案：
 
-   ```bash
-   # 到 https://tailscale.com 下載安裝
-   ```
+**選項 A：playit.gg（專為遊戲設計）**
 
-2. **設置 Tailscale**：
-   - 在所有要連線的裝置上安裝 Tailscale
-   - 使用同一個帳號登入
+```bash
+./scripts/remote-connect-playit.sh
+```
 
-3. **連線方式**：
-   - 朋友使用你的 Tailscale IP 連線
-   - 例如：`100.x.x.x:25565`
+**選項 B：Serveo（基於 SSH）**
+
+```bash
+./scripts/remote-connect-serveo.sh
+```
+
+#### 方法四：使用 Tailscale（最安全）
+
+```bash
+# 一鍵設置 Tailscale VPN
+./scripts/remote-connect-tailscale.sh
+```
+
+這個腳本會自動：
+- 檢查並安裝 Tailscale
+- 設置 VPN 連線
+- 顯示你的私有 IP
+- 提供朋友的連線指南
+
+**優點**：完全私密、穩定、不斷線  
+**缺點**：所有朋友都需要安裝 Tailscale
 
 ### 防火牆設定
 
@@ -377,6 +386,80 @@ New-NetFirewallRule -DisplayName "Minecraft Server" -Direction Inbound -LocalPor
 - 檢查防火牆設定
 - 確認端口轉發正確
 - 驗證公網 IP 是否正確
+- **WiFi 使用者特別注意**：需要額外設定路由器端口轉發
+
+**Q: 我無法修改路由器設定，有其他方式嗎？**
+
+如果你無法訪問路由器設定（學校宿舍、公司網路、租屋等），可以使用以下替代方案：
+
+**方案一：使用 ngrok（最簡單）**
+
+1. **註冊並安裝 ngrok**：
+   
+   ```bash
+   # 註冊：https://ngrok.com/signup（免費）
+   # macOS 安裝：
+   brew install ngrok/ngrok/ngrok
+   
+   # 或直接下載：https://ngrok.com/download
+   ```
+
+2. **設置驗證**：
+   
+   ```bash
+   # 在 ngrok 網站取得 authtoken 後執行：
+   ngrok config add-authtoken <你的authtoken>
+   ```
+
+3. **啟動隧道**：
+   
+   ```bash
+   ngrok tcp 25565
+   ```
+
+4. **取得連線地址**：
+   - ngrok 會顯示類似：`0.tcp.ngrok.io:12345`
+   - 將此地址給朋友連線
+
+**方案二：使用 Tailscale VPN（最安全）**
+
+1. **所有人安裝 Tailscale**：
+   - 到 https://tailscale.com 下載
+   - 用同一個 Google/Microsoft 帳號登入
+
+2. **連線方式**：
+   - 朋友使用你的 Tailscale IP 連線
+   - 查看 IP：`tailscale ip -4`
+
+**方案三：使用雲端伺服器（適合長期使用）**
+
+1. **申請免費雲端服務**：
+   - Oracle Cloud（永久免費）
+   - Google Cloud（300美元免費額度）
+   - AWS（12個月免費）
+
+2. **部署到雲端**：
+   
+   ```bash
+   # 複製專案到雲端伺服器
+   git clone https://github.com/yu-codes/yu-minecraft.git
+   cd yu-minecraft
+   docker compose -f docker/docker-compose.yml up -d
+   ```
+
+**方案四：使用 VS Code Port Forwarding（臨時測試）**
+
+如果你有 GitHub 帳號且使用 VS Code：
+
+1. **安裝 VS Code 和 Remote-Tunnels 擴展**
+2. **在終端執行**：
+   
+   ```bash
+   # 啟動端口轉發
+   code tunnel --accept-server-license-terms
+   ```
+
+3. **朋友通過 vscode.dev 連線**
 
 **Q: 連線很慢？**
 
