@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yu Minecraft Server - 管理面板</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-header i {
+            font-size: 2rem;
+            margin-right: 15px;
+            color: #667eea;
+        }
+
+        .card-header h3 {
+            font-size: 1.5rem;
+            color: #333;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .status-online {
+            background-color: #4CAF50;
+            animation: pulse 2s infinite;
+        }
+
+        .status-offline {
+            background-color: #f44336;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .info-item {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .info-item .value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .info-item .label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #f44336, #d32f2f);
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, #4CAF50, #388e3c);
+        }
+
+        .command-panel {
+            background: #2d3748;
+            border-radius: 15px;
+            padding: 25px;
+            color: white;
+        }
+
+        .command-input {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .command-input input {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: #4a5568;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .command-input input::placeholder {
+            color: #a0aec0;
+        }
+
+        .logs {
+            height: 200px;
+            overflow-y: auto;
+            background: #1a202c;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            opacity: 0.8;
+            margin-top: 40px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #4CAF50, #8BC34A);
+            border-radius: 5px;
+            transition: width 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-cube"></i> Yu Minecraft Server</h1>
+            <p>專業的Minecraft私服管理面板</p>
+        </div>
+
+        <div class="dashboard">
+            <!-- 伺服器狀態卡片 -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-server"></i>
+                    <h3>伺服器狀態</h3>
+                </div>
+                <div class="status">
+                    <div class="status-indicator status-online"></div>
+                    <span>伺服器執行中</span>
+                </div>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="value" id="online-players">3</div>
+                        <div class="label">線上玩家</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="value">20</div>
+                        <div class="label">最大玩家</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="value">v1.20.1</div>
+                        <div class="label">伺服器版本</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="value">72ms</div>
+                        <div class="label">延遲</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 系統資源卡片 -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>系統資源</h3>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span>CPU使用率</span>
+                        <span>45%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 45%"></div>
+                    </div>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span>記憶體使用率</span>
+                        <span>68%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 68%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span>磁碟使用率</span>
+                        <span>32%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 32%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 快速操作卡片 -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-bolt"></i>
+                    <h3>快速操作</h3>
+                </div>
+                <div style="text-align: center;">
+                    <button class="btn btn-success" onclick="startServer()">
+                        <i class="fas fa-play"></i> 啟動伺服器
+                    </button>
+                    <button class="btn btn-danger" onclick="stopServer()">
+                        <i class="fas fa-stop"></i> 停止伺服器
+                    </button>
+                    <button class="btn" onclick="restartServer()">
+                        <i class="fas fa-redo"></i> 重啟伺服器
+                    </button>
+                    <button class="btn" onclick="backupWorld()">
+                        <i class="fas fa-download"></i> 備份世界
+                    </button>
+                </div>
+            </div>
+
+            <!-- 線上玩家卡片 -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-users"></i>
+                    <h3>線上玩家</h3>
+                </div>
+                <div id="player-list">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee;">
+                        <span><i class="fas fa-user"></i> Steve</span>
+                        <span style="color: #4CAF50;">線上 2小時</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee;">
+                        <span><i class="fas fa-user"></i> Alex</span>
+                        <span style="color: #4CAF50;">線上 45分鐘</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0;">
+                        <span><i class="fas fa-user"></i> Notch</span>
+                        <span style="color: #4CAF50;">線上 15分鐘</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 控制台指令面板 -->
+        <div class="command-panel">
+            <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                <i class="fas fa-terminal" style="margin-right: 10px; color: #4CAF50;"></i>
+                <h3>伺服器控制台</h3>
+            </div>
+            <div class="logs" id="console-logs">
+                [INFO] Starting minecraft server version 1.20.1<br>
+                [INFO] Loading properties<br>
+                [INFO] Default game type: SURVIVAL<br>
+                [INFO] Generating keypair<br>
+                [INFO] Starting Minecraft server on *:25565<br>
+                [INFO] Done (4.123s)! For help, type "help"<br>
+                [INFO] Steve joined the game<br>
+                [INFO] Alex joined the game<br>
+                [INFO] Notch joined the game<br>
+            </div>
+            <div class="command-input">
+                <input type="text" id="command-input" placeholder="輸入伺服器指令... (例如: say Hello World)" onkeypress="handleCommand(event)">
+                <button class="btn" onclick="sendCommand()">
+                    <i class="fas fa-paper-plane"></i> 發送
+                </button>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>&copy; 2023 Yu Minecraft Server. 基於Docker建構的專業Minecraft私服解決方案.</p>
+        </div>
+    </div>
+
+    <script>
+        // 模擬即時資料更新
+        function updatePlayerCount() {
+            const count = Math.floor(Math.random() * 5) + 1;
+            document.getElementById('online-players').textContent = count;
+        }
+
+        function addLogEntry(message) {
+            const logs = document.getElementById('console-logs');
+            const time = new Date().toLocaleTimeString();
+            logs.innerHTML += `[INFO] [${time}] ${message}<br>`;
+            logs.scrollTop = logs.scrollHeight;
+        }
+
+        function sendCommand() {
+            const input = document.getElementById('command-input');
+            const command = input.value.trim();
+            if (command) {
+                addLogEntry(`> ${command}`);
+                addLogEntry(`指令已執行: ${command}`);
+                input.value = '';
+            }
+        }
+
+        function handleCommand(event) {
+            if (event.key === 'Enter') {
+                sendCommand();
+            }
+        }
+
+        function startServer() {
+            addLogEntry('正在啟動伺服器...');
+            setTimeout(() => {
+                addLogEntry('伺服器啟動成功!');
+            }, 2000);
+        }
+
+        function stopServer() {
+            addLogEntry('正在停止伺服器...');
+            setTimeout(() => {
+                addLogEntry('伺服器安全停止.');
+            }, 2000);
+        }
+
+        function restartServer() {
+            addLogEntry('正在重啟伺服器...');
+            setTimeout(() => {
+                addLogEntry('伺服器重啟成功!');
+            }, 3000);
+        }
+
+        function backupWorld() {
+            addLogEntry('正在建立世界備份...');
+            setTimeout(() => {
+                addLogEntry('世界備份完成!');
+            }, 5000);
+        }
+
+        // 每30秒更新一次玩家數量
+        setInterval(updatePlayerCount, 30000);
+
+        // 頁面載入完成後的初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            addLogEntry('Web管理面板已連接到伺服器');
+        });
+    </script>
+</body>
+</html>

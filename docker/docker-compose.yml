@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  minecraft:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: yu-minecraft-server
+    ports:
+      - "25565:25565"  # Minecraft服务器端口
+      - "25575:25575"  # RCON端口
+    volumes:
+      - ../worlds:/minecraft/world
+      - ../plugins:/minecraft/plugins
+      - ../config:/minecraft/config
+      - minecraft-logs:/minecraft/logs
+    environment:
+      - EULA=TRUE
+      - MEMORY=2G
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+    networks:
+      - minecraft-network
+
+  web-admin:
+    image: nginx:alpine
+    container_name: yu-minecraft-web
+    ports:
+      - "8080:80"
+    volumes:
+      - ../web:/usr/share/nginx/html:ro
+    depends_on:
+      - minecraft
+    restart: unless-stopped
+    networks:
+      - minecraft-network
+
+volumes:
+  minecraft-logs:
+
+networks:
+  minecraft-network:
+    driver: bridge

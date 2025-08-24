@@ -22,3 +22,66 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+
+# Minecraft伺服器檔案
+worlds/
+logs/
+crash-reports/
+debug/
+
+# 備份檔案
+backups/
+
+# 臨時檔案
+*.tmp
+*.cache
+.DS_Store
+Thumbs.db
+
+# IDE檔案
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Docker相關
+.docker/
+
+# 環境變數
+.env
+.env.local
+.env.production
+
+# 敏感配置檔案
+config/ops.json
+config/whitelist.json
+config/banned-players.json
+config/banned-ips.json
+
+# 執行時檔案
+*.pid
+*.sock
+
+# 建構產物
+target/
+build/
+dist/
+
+# 依賴檔案
+node_modules/
+vendor/
+
+# 使用者資料
+usercache.json
+usernamecache.json
+banned-ips.json
+banned-players.json
+
+# 效能分析檔案
+*.hprof
+*.prof
+
+# 外掛配置(包含敏感資訊的)
+plugins/*/config.yml
+plugins/*/database.db

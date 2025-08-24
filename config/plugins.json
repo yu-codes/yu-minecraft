@@ -1,0 +1,107 @@
+{
+  "recommended_plugins": [
+    {
+      "name": "EssentialsX",
+      "description": "基本伺服器指令和功能",
+      "url": "https://github.com/EssentialsX/Essentials/releases/latest/download/EssentialsX-2.20.1.jar",
+      "category": "core",
+      "required": true,
+      "config_template": {
+        "spawn-on-join": true,
+        "change-displayname": true,
+        "teleport-cooldown": 0,
+        "heal-cooldown": 60
+      }
+    },
+    {
+      "name": "WorldEdit",
+      "description": "世界編輯工具",
+      "url": "https://dev.bukkit.org/projects/worldedit/files/latest",
+      "category": "building",
+      "required": false,
+      "permissions": ["worldedit.*"]
+    },
+    {
+      "name": "LuckPerms",
+      "description": "權限管理系統",
+      "url": "https://github.com/LuckPerms/LuckPerms/releases/latest/download/LuckPerms-Bukkit-5.4.102.jar",
+      "category": "admin",
+      "required": false,
+      "config_template": {
+        "server": "yu-minecraft",
+        "storage-method": "h2",
+        "split-storage": false
+      }
+    },
+    {
+      "name": "Vault",
+      "description": "經濟系統API",
+      "url": "https://github.com/MilkBowl/Vault/releases/latest/download/Vault.jar",
+      "category": "economy",
+      "required": false,
+      "dependencies": []
+    },
+    {
+      "name": "ChestShop",
+      "description": "商店系統",
+      "url": "https://github.com/ChestShop-authors/ChestShop-3/releases/latest/download/ChestShop.jar",
+      "category": "economy",
+      "required": false,
+      "dependencies": ["Vault"],
+      "config_template": {
+        "SHOP_INTERACTION_INTERVAL": 250,
+        "ALLOW_MULTIPLE_WORLDS": true,
+        "ECONOMY_ACCOUNT": ""
+      }
+    },
+    {
+      "name": "WorldGuard",
+      "description": "區域保護系統",
+      "url": "https://dev.bukkit.org/projects/worldguard/files/latest",
+      "category": "protection",
+      "required": false,
+      "dependencies": ["WorldEdit"]
+    },
+    {
+      "name": "mcMMO",
+      "description": "RPG技能系統",
+      "url": "https://github.com/mcMMO-Dev/mcMMO/releases/latest/download/mcMMO.jar",
+      "category": "rpg",
+      "required": false,
+      "config_template": {
+        "Skills_Only_Activate_When_Sneaking": false,
+        "Hardcore_Death_Stat_Loss_Rate": 75,
+        "Vampirism_Death_Stat_Loss_Rate": 50
+      }
+    },
+    {
+      "name": "Dynmap",
+      "description": "網頁地圖系統",
+      "url": "https://github.com/webbukkit/dynmap/releases/latest/download/Dynmap-3.7-beta-4-spigot.jar",
+      "category": "utility",
+      "required": false,
+      "ports": [8123],
+      "config_template": {
+        "webserver-bindaddress": "0.0.0.0",
+        "webserver-port": 8123,
+        "max-chunk-loads-per-tick": 200
+      }
+    }
+  ],
+  "plugin_categories": {
+    "core": "核心功能",
+    "admin": "管理工具",
+    "economy": "經濟系統",
+    "protection": "保護系統",
+    "building": "建築工具",
+    "rpg": "RPG系統",
+    "utility": "實用工具",
+    "fun": "娛樂功能"
+  },
+  "installed_plugins": [],
+  "server_settings": {
+    "auto_update": false,
+    "backup_before_update": true,
+    "load_order": ["Vault", "LuckPerms", "EssentialsX", "WorldEdit", "WorldGuard", "ChestShop", "mcMMO", "Dynmap"]
+  }
+}
