@@ -20,9 +20,9 @@ check_requirements() {
         exit 1
     fi
     
-    # 檢查Docker Compose
-    if ! command -v docker-compose &> /dev/null; then
-        echo "❌ Docker Compose未安裝，請先安裝Docker Compose"
+    # 檢查Docker Compose (V2新版本)
+    if ! docker compose version &> /dev/null; then
+        echo "❌ Docker Compose未安裝或版本過舊，請先安裝Docker Compose V2"
         echo "📖 安裝指南: https://docs.docker.com/compose/install/"
         exit 1
     fi
@@ -65,7 +65,7 @@ init_project() {
 build_image() {
     echo "🐳 建構Docker映像檔..."
     cd docker
-    docker-compose build --no-cache
+    docker compose build --no-cache
     cd ..
     echo "✅ Docker映像檔建構完成"
 }
@@ -74,7 +74,7 @@ build_image() {
 start_services() {
     echo "🎮 啟動服務..."
     cd docker
-    docker-compose up -d
+    docker compose up -d
     cd ..
     
     # 等待服務啟動
@@ -83,11 +83,11 @@ start_services() {
     
     # 檢查服務狀態
     cd docker
-    if docker-compose ps | grep -q "Up"; then
+    if docker compose ps | grep -q "Up"; then
         echo "✅ 服務啟動成功!"
     else
         echo "❌ 服務啟動失敗，查看記錄:"
-        docker-compose logs
+        docker compose logs
         exit 1
     fi
     cd ..
@@ -104,7 +104,7 @@ show_info() {
     echo "🔑 RCON密碼: yu-minecraft-2023"
     echo ""
     echo "📋 常用指令:"
-    echo "   查看記錄: cd docker && docker-compose logs -f minecraft"
+    echo "   查看記錄: cd docker && docker compose logs -f minecraft"
     echo "   停止服務: ./scripts/stop.sh"
     echo "   備份世界: ./scripts/backup.sh"
     echo "   重啟服務: ./scripts/stop.sh && ./scripts/start.sh"

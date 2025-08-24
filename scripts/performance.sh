@@ -21,9 +21,9 @@ mkdir -p "$PERFORMANCE_LOG_DIR"
 get_server_tps() {
     cd "$(dirname "$0")/../docker"
     
-    if docker-compose ps | grep -q "Up"; then
+    if docker compose ps | grep -q "Up"; then
         # 使用RCON獲取TPS
-        TPS_OUTPUT=$(docker-compose exec -T minecraft rcon-cli --host localhost --port 25575 --password yu-minecraft-2025 "forge tps" 2>/dev/null || echo "N/A")
+        TPS_OUTPUT=$(docker compose exec -T minecraft rcon-cli --host localhost --port 25575 --password yu-minecraft-2025 "forge tps" 2>/dev/null || echo "N/A")
         echo "$TPS_OUTPUT" | grep -o "[0-9]*\.[0-9]*" | head -1 || echo "20.0"
     else
         echo "0.0"
@@ -34,9 +34,9 @@ get_server_tps() {
 get_memory_usage() {
     cd "$(dirname "$0")/../docker"
     
-    if docker-compose ps | grep -q "Up"; then
+    if docker compose ps | grep -q "Up"; then
         # 獲取JVM記憶體使用
-        MEMORY_INFO=$(docker-compose exec -T minecraft rcon-cli --host localhost --port 25575 --password yu-minecraft-2025 "memory" 2>/dev/null || echo "Used: 0MB Total: 0MB")
+        MEMORY_INFO=$(docker compose exec -T minecraft rcon-cli --host localhost --port 25575 --password yu-minecraft-2025 "memory" 2>/dev/null || echo "Used: 0MB Total: 0MB")
         
         USED_MEMORY=$(echo "$MEMORY_INFO" | grep -o "Used: [0-9]*" | grep -o "[0-9]*" || echo "0")
         TOTAL_MEMORY=$(echo "$MEMORY_INFO" | grep -o "Total: [0-9]*" | grep -o "[0-9]*" || echo "1")
@@ -52,9 +52,9 @@ get_memory_usage() {
 get_player_stats() {
     cd "$(dirname "$0")/../docker"
     
-    if docker-compose ps | grep -q "Up"; then
+    if docker compose ps | grep -q "Up"; then
         # 獲取線上玩家數量
-        ONLINE_COUNT=$(docker-compose exec -T minecraft rcon-cli --host localhost --port 25575 --password yu-minecraft-2025 "list" 2>/dev/null | grep -o "There are [0-9]*" | grep -o "[0-9]*" || echo "0")
+        ONLINE_COUNT=$(docker compose exec -T minecraft rcon-cli --host localhost --port 25575 --password yu-minecraft-2025 "list" 2>/dev/null | grep -o "There are [0-9]*" | grep -o "[0-9]*" || echo "0")
         
         # 獲取最大玩家數
         MAX_PLAYERS=$(grep "max-players" ../config/server.properties | cut -d'=' -f2 || echo "20")

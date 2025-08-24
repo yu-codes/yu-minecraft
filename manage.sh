@@ -210,7 +210,7 @@ maintenance_menu() {
             3)
                 echo "🐳 重建Docker映像檔..."
                 cd docker
-                docker-compose build --no-cache
+                docker compose build --no-cache
                 cd ..
                 ;;
             4)
@@ -270,9 +270,9 @@ system_check() {
     
     echo ""
     echo "2. 檢查Docker Compose..."
-    if command -v docker-compose &> /dev/null; then
+    if docker compose version &> /dev/null; then
         echo -e "   ${GREEN}✅ Docker Compose已安裝${NC}"
-        docker-compose --version
+        docker compose version
     else
         echo -e "   ${RED}❌ Docker Compose未安裝${NC}"
     fi

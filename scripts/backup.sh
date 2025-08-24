@@ -30,10 +30,10 @@ fi
 
 # 如果伺服器正在執行，先儲存世界資料
 cd docker
-if docker-compose ps | grep -q "Up"; then
+if docker compose ps | grep -q "Up"; then
     echo "💾 伺服器正在執行，儲存目前世界資料..."
-    docker-compose exec -T minecraft rcon-cli --host localhost --port 25575 --password yu-minecraft-2023 "save-all" || true
-    docker-compose exec -T minecraft rcon-cli --host localhost --port 25575 --password yu-minecraft-2023 "save-off" || true
+    docker compose exec -T minecraft rcon-cli --host localhost --port 25575 --password yu-minecraft-2023 "save-all" || true
+    docker compose exec -T minecraft rcon-cli --host localhost --port 25575 --password yu-minecraft-2023 "save-off" || true
     
     # 等待儲存完成
     sleep 5
@@ -49,7 +49,7 @@ if docker-compose ps | grep -q "Up"; then
     
     # 重新啟用自動儲存
     cd docker
-    docker-compose exec -T minecraft rcon-cli --host localhost --port 25575 --password yu-minecraft-2023 "save-on" || true
+    docker compose exec -T minecraft rcon-cli --host localhost --port 25575 --password yu-minecraft-2023 "save-on" || true
     
 else
     echo "📁 伺服器未執行，直接創建備份..."

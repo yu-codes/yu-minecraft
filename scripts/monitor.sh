@@ -24,7 +24,7 @@ init_monitor() {
 check_server_status() {
     cd "$(dirname "$0")/../docker"
     
-    if docker-compose ps | grep -q "Up"; then
+    if docker compose ps | grep -q "Up"; then
         echo "ONLINE"
     else
         echo "OFFLINE"
@@ -35,9 +35,9 @@ check_server_status() {
 get_online_players() {
     cd "$(dirname "$0")/../docker"
     
-    if docker-compose ps | grep -q "Up"; then
+    if docker compose ps | grep -q "Up"; then
         # 使用RCON獲取線上玩家
-        PLAYERS=$(docker-compose exec -T minecraft rcon-cli --host localhost --port 25575 --password yu-minecraft-2025 "list" 2>/dev/null | grep -o "There are [0-9]*" | grep -o "[0-9]*" || echo "0")
+        PLAYERS=$(docker compose exec -T minecraft rcon-cli --host localhost --port 25575 --password yu-minecraft-2025 "list" 2>/dev/null | grep -o "There are [0-9]*" | grep -o "[0-9]*" || echo "0")
         echo "${PLAYERS:-0}"
     else
         echo "0"
@@ -77,7 +77,7 @@ get_system_resources() {
 check_container_health() {
     cd "$(dirname "$0")/../docker"
     
-    if docker-compose ps | grep -q "Up"; then
+    if docker compose ps | grep -q "Up"; then
         # 檢查容器記憶體使用
         CONTAINER_MEMORY=$(docker stats --no-stream --format "table {{.MemPerc}}" yu-minecraft-server 2>/dev/null | tail -n 1 | sed 's/%//' || echo "0")
         
