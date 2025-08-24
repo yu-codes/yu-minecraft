@@ -1,5 +1,5 @@
-# 使用官方Java 17運行時作為基礎映像檔
-FROM openjdk:17-jdk-slim
+# 使用官方Java 21運行時作為基礎映像檔（Minecraft 1.21.8需要）
+FROM openjdk:21-jdk-slim
 
 # 設定工作目錄
 WORKDIR /minecraft
@@ -15,7 +15,7 @@ RUN useradd -m -u 1000 minecraft && \
 
 # 下載Minecraft伺服器jar檔案 (1.21.8版本)
 ARG MC_VERSION=1.21.8
-RUN wget -O server.jar https://piston-data.mojang.com/v1/objects/59353fb40c36d304f2035d51e7d6e6baa98dc05c/server.jar
+RUN wget -O server.jar https://piston-data.mojang.com/v1/objects/6bce4ef400e4efaa63a13d5e6f6b500be969ef81/server.jar
 
 # 複製配置檔案
 COPY config/ ./

@@ -109,6 +109,8 @@ yu-minecraft/
 ### 伺服器配置
 
 - **埠號**: 25565 (可在docker-compose.yml中修改)
+- **版本**: Minecraft 1.21.8 (正式版)
+- **Java**: Java 21 LTS
 - **最大玩家數**: 20 (可在server.properties中修改)
 - **遊戲模式**: Survival (可配置)
 - **難度**: Normal (可配置)
