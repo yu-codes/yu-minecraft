@@ -220,6 +220,175 @@ yu-minecraft/
 
 訪問 <http://localhost:8080> 查看Web管理介面
 
+## 🌐 遠端連線設定
+
+### 本地網路連線（區域網）
+
+如果你想讓同一區域網路的朋友連線：
+
+1. **查看你的內網 IP**：
+
+   ```bash
+   # macOS/Linux
+   ifconfig | grep "inet " | grep -v 127.0.0.1
+   
+   # Windows
+   ipconfig
+   ```
+
+2. **朋友連線方式**：
+   - 伺服器地址：`你的內網IP:25565`
+   - 例如：`192.168.1.100:25565`
+
+### 外網連線設定
+
+#### 方法一：路由器端口轉發（推薦）
+
+1. **登入路由器管理界面**：
+   - 通常是 `192.168.1.1` 或 `192.168.0.1`
+   - 使用管理員帳號密碼登入
+
+2. **設定端口轉發**：
+   - 找到「端口轉發」或「虛擬伺服器」設定
+   - 添加規則：
+     - 服務名稱：Minecraft Server
+     - 內部 IP：你的電腦內網 IP
+     - 內部端口：25565
+     - 外部端口：25565
+     - 協議：TCP
+
+3. **取得公網 IP**：
+
+   ```bash
+   curl ifconfig.me
+   ```
+
+4. **朋友連線方式**：
+   - 伺服器地址：`你的公網IP:25565`
+
+#### 方法二：使用 ngrok（簡單但有限制）
+
+1. **安裝 ngrok**：
+
+   ```bash
+   # 到 https://ngrok.com 註冊並下載
+   # 或使用 Homebrew (macOS)
+   brew install ngrok/ngrok/ngrok
+   ```
+
+2. **設置 ngrok**：
+
+   ```bash
+   # 使用你的 authtoken
+   ngrok config add-authtoken <your-authtoken>
+   ```
+
+3. **啟動隧道**：
+
+   ```bash
+   ngrok tcp 25565
+   ```
+
+4. **取得連線地址**：
+   - ngrok 會顯示類似：`0.tcp.ngrok.io:12345`
+   - 這就是朋友的連線地址
+
+#### 方法三：使用 Tailscale（推薦給技術用戶）
+
+1. **安裝 Tailscale**：
+
+   ```bash
+   # 到 https://tailscale.com 下載安裝
+   ```
+
+2. **設置 Tailscale**：
+   - 在所有要連線的裝置上安裝 Tailscale
+   - 使用同一個帳號登入
+
+3. **連線方式**：
+   - 朋友使用你的 Tailscale IP 連線
+   - 例如：`100.x.x.x:25565`
+
+### 防火牆設定
+
+確保防火牆允許 25565 端口：
+
+#### macOS
+
+```bash
+# 檢查防火牆狀態
+sudo /usr/libexec/ApplicationFirewall/socketfilterfw --getglobalstate
+
+# 如果需要，允許 Docker
+sudo /usr/libexec/ApplicationFirewall/socketfilterfw --add /Applications/Docker.app
+```
+
+#### Linux (Ubuntu/Debian)
+
+```bash
+# 允許 25565 端口
+sudo ufw allow 25565/tcp
+
+# 檢查狀態
+sudo ufw status
+```
+
+#### Windows
+
+```powershell
+# 以管理員身份運行 PowerShell
+New-NetFirewallRule -DisplayName "Minecraft Server" -Direction Inbound -LocalPort 25565 -Protocol TCP -Action Allow
+```
+
+### 安全建議
+
+1. **使用白名單**：
+
+   ```bash
+   # 編輯 config/whitelist.json
+   # 只允許信任的玩家連線
+   ```
+
+2. **設定管理員**：
+
+   ```bash
+   # 編輯 config/ops.json
+   # 給信任的玩家管理員權限
+   ```
+
+3. **定期備份**：
+
+   ```bash
+   # 使用備份腳本
+   ./scripts/backup.sh
+   ```
+
+4. **監控連線**：
+
+   ```bash
+   # 監控伺服器狀態
+   ./scripts/monitor.sh continuous
+   ```
+
+### 常見問題
+
+**Q: 朋友無法連線？**
+
+- 檢查防火牆設定
+- 確認端口轉發正確
+- 驗證公網 IP 是否正確
+
+**Q: 連線很慢？**
+
+- 檢查網路頻寬
+- 考慮調整伺服器配置
+- 使用就近的 VPS
+
+**Q: 如何限制玩家數量？**
+
+- 編輯 `config/server.properties`
+- 修改 `max-players=20`
+
 ## 🛠️ 開發計畫
 
 - [x] 專案初始化
