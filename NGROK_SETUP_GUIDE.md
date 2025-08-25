@@ -204,6 +204,51 @@ open http://localhost:4040
 - 流量使用情況
 - 連線記錄
 
+### 使用監控腳本
+
+我們提供了專門的監控腳本來幫你追蹤流量：
+
+#### 互動式監控
+
+```bash
+# 開啟互動式監控界面
+./scripts/ngrok-monitor.sh
+```
+
+功能包括：
+- ✅ 檢查隧道狀態
+- 📊 即時流量監控
+- 🚨 設置流量警報
+- 📋 生成流量報告
+- 🌐 快速開啟 Web 界面
+
+#### 背景自動監控
+
+```bash
+# 開始背景監控
+./scripts/ngrok-auto-monitor.sh start
+
+# 查看監控狀態
+./scripts/ngrok-auto-monitor.sh status
+
+# 查看最近日誌
+./scripts/ngrok-auto-monitor.sh logs
+
+# 生成每日報告
+./scripts/ngrok-auto-monitor.sh report
+
+# 停止監控
+./scripts/ngrok-auto-monitor.sh stop
+```
+
+#### 監控功能特色
+
+- 📈 **即時統計**: 連線數、流量、請求統計
+- 🚨 **自動警報**: 超過設定閾值時發出警告
+- 📊 **每日報告**: 自動生成詳細的使用報告
+- 🔍 **詳細日誌**: 記錄所有連線和異常狀況
+- 🧹 **自動清理**: 定期清理舊日誌檔案
+
 ### 固定子域名（付費功能）
 
 如果你升級到付費版，可以使用固定子域名：

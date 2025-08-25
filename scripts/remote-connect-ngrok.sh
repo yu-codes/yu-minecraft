@@ -109,6 +109,11 @@ echo "- 隧道會在 2 小時後斷線"
 echo "- 每次重啟會得到新的網址"
 echo "- 如需穩定連線，建議升級到付費版"
 echo
+echo -e "${BLUE}📊 監控功能:${NC}"
+echo "- 本地 Web 界面: http://localhost:4040"
+echo "- 流量監控腳本: ./scripts/ngrok-monitor.sh"
+echo "- 線上儀表板: https://dashboard.ngrok.com/obs/traffic-inspector"
+echo
 read -p "按 Enter 開始建立隧道..."
 
 echo
@@ -119,7 +124,11 @@ echo "Forwarding: tcp://0.tcp.ngrok.io:12345 -> localhost:25565"
 echo
 echo "將 '0.tcp.ngrok.io:12345' 這個地址給朋友連線！"
 echo
-echo "⚠️  按 Ctrl+C 停止隧道"
+echo -e "${YELLOW}📊 監控提示：${NC}"
+echo "- 在另一個終端執行 './scripts/ngrok-monitor.sh' 監控流量"
+echo "- 或在瀏覽器開啟 'http://localhost:4040' 查看即時統計"
+echo
+echo -e "${YELLOW}⚠️  按 Ctrl+C 停止隧道${NC}"
 echo
 
 # 啟動 ngrok
