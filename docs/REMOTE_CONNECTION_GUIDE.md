@@ -1,176 +1,229 @@
-# 🌐 無法修改路由器？外網連線替代方案
+# 🌐 遠端連線部署方案指南
 
-如果你無法修改路由器設定（學校宿舍、公司網路、租屋等），這裡提供多種解決方案。
+提供多種 Minecraft 伺服器部署方案，適合不同需求和技術水平的用戶。
 
-## 🚀 推薦方案比較
+## � 完整方案比較
 
-| 方案 | 難度 | 穩定性 | 費用 | 適合場景 |
-|------|------|--------|------|----------|
-| **ngrok** | ⭐ | ⭐⭐ | 免費/付費 | 快速測試、臨時遊戲 |
-| **Tailscale** | ⭐⭐ | ⭐⭐⭐⭐⭐ | 免費 | 長期使用、多人遊戲 |
-| **雲端伺服器** | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | 免費/付費 | 24/7 運行、大型社群 |
+| 方案 | 成本 | 設定難度 | 穩定性 | 效能 | 維護 | 適用場景 |
+|------|------|----------|--------|------|------|----------|
+| **Oracle Cloud** | ⭐⭐⭐⭐⭐ 永久免費 | ⭐⭐ 中等 | ⭐⭐⭐⭐⭐ 最高 | ⭐⭐⭐⭐⭐ 最高 | ⭐⭐ 中等 | 長期運行，24/7 |
+| **AWS EC2** | ⭐⭐⭐ 12個月免費 | ⭐⭐⭐ 中等 | ⭐⭐⭐⭐⭐ 最高 | ⭐⭐⭐⭐⭐ 最高 | ⭐⭐ 中等 | 企業級部署 |
+| **Tailscale** | ⭐⭐⭐⭐ 免費 | ⭐⭐⭐⭐ 簡單 | ⭐⭐⭐⭐⭐ 最高 | ⭐⭐⭐⭐ 高 | ⭐⭐⭐⭐ 簡單 | 私人朋友圈 |
+| **ngrok** | ⭐⭐ 免費+限制 | ⭐⭐⭐⭐⭐ 最簡單 | ⭐⭐ 低 | ⭐⭐⭐⭐ 高 | ⭐⭐⭐⭐ 簡單 | 臨時測試 |
+| **Playit.gg** | ⭐⭐⭐⭐ 免費 | ⭐⭐⭐⭐ 簡單 | ⭐⭐⭐ 中等 | ⭐⭐⭐ 中等 | ⭐⭐⭐⭐ 簡單 | 快速分享 |
+| **本地部署** | ⭐⭐⭐⭐⭐ 免費 | ⭐⭐⭐⭐⭐ 最簡單 | ⭐⭐⭐ 中等 | ⭐⭐⭐⭐⭐ 最高 | ⭐⭐⭐ 中等 | 開發測試 |
 
-## 🎯 方案一：ngrok（最簡單）
+## 🥇 推薦方案：Oracle Cloud
+
+### 優勢
+- **永久免費**：無需信用卡付費（僅驗證用）
+- **高效能**：ARM 處理器，4 核心 + 24GB RAM
+- **24/7 運行**：不需要保持電腦開機
+- **固定 IP**：不會頻繁變更地址
+- **企業級**：Oracle 企業級雲端基礎設施
+
+### 部署指令
+```bash
+./scripts/remote-connect-oracle.sh
+```
+
+### 詳細指南
+完整設置說明請參考：[ORACLE_CLOUD_GUIDE.md](./ORACLE_CLOUD_GUIDE.md)
+
+## 🥈 替代雲端方案：AWS EC2
+
+### 優勢
+- **穩定可靠**：AWS 全球領先的雲端服務
+- **12個月免費**：t2.micro 實例免費使用
+- **豐富工具**：完整的監控和管理功能
+- **彈性擴展**：隨時升級實例規格
+
+### 部署指南
+詳細設置說明請參考：[AWS_DEPLOYMENT_GUIDE.md](./AWS_DEPLOYMENT_GUIDE.md)
+
+## 🔒 最安全方案：Tailscale
+
+### 優勢
+- **完全私密**：VPN 加密連線
+- **無需公網 IP**：不用修改路由器設定
+- **連線穩定**：不會斷線重連
+- **跨平台支援**：支援所有主要平台
 
 ### 自動設置
-
 ```bash
-# 一鍵設置，腳本會自動處理所有步驟
+./scripts/remote-connect-tailscale.sh
+```
+
+### 手動設置步驟
+
+1. **所有人安裝 Tailscale**：
+   - 下載：https://tailscale.com/download
+   - 支援 Windows、Mac、Linux、手機
+
+2. **使用相同帳號登入**：
+   - 可以用 Google、Microsoft 或 GitHub 帳號
+   - 所有玩家登入同一個帳號
+
+3. **查看 Tailscale IP**：
+   ```bash
+   tailscale ip -4
+   ```
+
+4. **分享連線地址**：
+   - 格式：`你的Tailscale IP:25565`
+   - 例如：`100.64.0.1:25565`
+
+## ⚡ 最快方案：ngrok
+
+### 優勢
+- **設置最簡單**：幾分鐘內完成
+- **無需技術知識**：適合新手
+- **即開即用**：立即建立公網連線
+
+### 限制
+- **免費版限制**：每 2 小時需重新啟動
+- **隨機地址**：每次重啟會變更網址
+- **連線不穩**：可能會突然斷線
+
+### 自動設置
+```bash
 ./scripts/remote-connect-ngrok.sh
 ```
 
-### 手動設置
+### 手動設置步驟
 
 1. **註冊 ngrok**：
    - 訪問：https://ngrok.com/signup
    - 免費註冊帳號
 
 2. **安裝 ngrok**：
-
    ```bash
-   # macOS (推薦)
+   # macOS
    brew install ngrok/ngrok/ngrok
    
    # 或下載：https://ngrok.com/download
    ```
 
 3. **設置認證**：
-
    ```bash
-   # 在 ngrok 網站取得 authtoken
    ngrok config add-authtoken <你的authtoken>
    ```
 
 4. **啟動隧道**：
-
    ```bash
-   # 建立隧道到你的 Minecraft 伺服器
    ngrok tcp 25565
    ```
 
-5. **分享連線地址**：
-   - ngrok 會顯示：`tcp://0.tcp.ngrok.io:12345`
-   - 將此地址給朋友連線
+## 🎯 簡單方案：Playit.gg
 
-### ngrok 限制
-
-- 🔄 免費版每 2 小時需重新啟動
-- 🎲 每次重啟會得到新的隨機網址
-- 💰 付費版可以使用固定網址
-
----
-
-## 🔒 方案二：Tailscale（最推薦）
+### 優勢
+- **免費使用**：無時間限制
+- **簡單設置**：網頁介面操作
+- **無需註冊雲端**：不用申請雲端帳號
 
 ### 自動設置
-
 ```bash
-# 一鍵設置，腳本會自動處理所有步驟
-./scripts/remote-connect-tailscale.sh
+./scripts/remote-connect-playit.sh
 ```
 
-### 手動設置
+### 手動設置步驟
 
-1. **所有人安裝 Tailscale**：
-   - 你和朋友都需要安裝
-   - 下載：https://tailscale.com/download
+1. **訪問 Playit.gg**：
+   - 網址：https://playit.gg
+   - 無需註冊
 
-2. **使用相同帳號登入**：
-   - 可以用 Google、Microsoft 或 GitHub 帳號
-   - 所有人登入同一個帳號
+2. **下載客戶端**：
+   - 支援多平台
 
-3. **查看你的 Tailscale IP**：
+3. **建立隧道**：
+   - 選擇 Minecraft
+   - 設定本地埠 25565
 
-   ```bash
-   tailscale ip -4
-   ```
+## 🏠 本地部署方案
 
-4. **朋友連線方式**：
-   - 地址：`你的Tailscale IP:25565`
-   - 例如：`100.64.0.1:25565`
+### 適用情況
+- 開發測試
+- 本地網路遊戲
+- 學習 Docker
 
-### Tailscale 優點
-
-- 🔐 完全私密和安全（VPN）
-- 🔄 連線穩定，不會斷線
-- 🆓 完全免費（100 台設備內）
-- 🌐 跨平台支援（Windows、Mac、手機）
-
----
-
-## ☁️ 方案三：雲端伺服器（24/7 運行）
-
-適合想要伺服器 24 小時運行的用戶。
-
-### 免費雲端選項
-
-1. **Oracle Cloud Always Free**：
-   - 永久免費
-   - 1GB RAM VM
-   - 註冊：https://cloud.oracle.com
-
-2. **Google Cloud Platform**：
-   - 300 美元免費額度
-   - 註冊：https://cloud.google.com
-
-3. **AWS Free Tier**：
-   - 12 個月免費
-   - t2.micro 執行個體
-   - 註冊：https://aws.amazon.com
-
-### 部署到雲端
-
+### 部署指令
 ```bash
-# 在雲端伺服器上執行
-git clone https://github.com/yu-codes/yu-minecraft.git
-cd yu-minecraft
-docker compose -f docker/docker-compose.yml up -d
+# 直接本地啟動
+docker-compose up -d
+
+# 查看狀態
+docker-compose ps
+
+# 連線地址
+localhost:25565
 ```
 
----
+## �️ 統一部署助手
 
-## 🔍 方案四：其他選項
+使用統一的部署腳本，輕鬆選擇最適合的方案：
 
-### 使用 Hamachi
+```bash
+./scripts/deploy.sh
+```
 
-1. 下載 LogMeIn Hamachi
-2. 建立網路，邀請朋友加入
-3. 使用 Hamachi IP 連線
+選單包含：
+1. Oracle Cloud - 永久免費雲端（推薦）
+2. AWS EC2 - 12個月免費雲端
+3. Tailscale - 私人網路連線
+4. ngrok - 臨時公網連線
+5. Playit.gg - 簡單免費方案
+6. 本地部署 - Docker 本地運行
 
-### 使用 Radmin VPN
+## 💡 選擇建議
 
-1. 下載 Radmin VPN（完全免費）
-2. 建立網路，邀請朋友
-3. 使用虛擬 IP 連線
+### 長期運行（推薦）
+1. **Oracle Cloud** - 永久免費，最佳選擇
+2. **AWS** - 企業級穩定性
+3. **Tailscale** - 私人朋友圈
 
----
+### 臨時測試
+1. **ngrok** - 最快上手
+2. **Playit.gg** - 簡單免費
+3. **本地部署** - 開發學習
 
-## 🎮 開始遊戲
+### 技術水平考量
+- **新手**：ngrok → Playit.gg → Tailscale
+- **進階**：Tailscale → Oracle Cloud → AWS
+- **專家**：Oracle Cloud → AWS → 自建
 
-選擇任一方案設置完成後：
+## 🔧 故障排除
 
-1. **確認伺服器運行**：
+### 連線問題
+```bash
+# 檢查服務狀態
+docker-compose ps
 
-   ```bash
-   docker compose -f docker/docker-compose.yml ps
-   ```
+# 查看日誌
+docker-compose logs minecraft
 
-2. **查看伺服器記錄**：
+# 測試本地連線
+telnet localhost 25565
+```
 
-   ```bash
-   docker compose -f docker/docker-compose.yml logs minecraft
-   ```
+### 防火牆設置
+```bash
+# 檢查埠口是否開放
+netstat -an | grep 25565
 
-3. **給朋友連線地址**，例如：
-   - ngrok: `0.tcp.ngrok.io:12345`
-   - Tailscale: `100.64.0.1:25565`
-   - 雲端: `雲端伺服器IP:25565`
+# Linux 開放埠口
+sudo ufw allow 25565
+```
 
-## 💡 小技巧
+### 效能監控
+```bash
+# 系統資源
+htop
 
-- **測試連線**：你可以先用 `localhost:25565` 測試本地連線
-- **查看玩家**：在伺服器控制台輸入 `list` 查看線上玩家
-- **備份世界**：定期執行 `./scripts/backup.sh` 備份遊戲資料
-- **效能監控**：使用 `./scripts/monitor.sh` 監控伺服器效能
+# Docker 資源
+docker stats
 
-選擇最適合你的方案，開始和朋友一起玩 Minecraft 吧！🎉
+# 伺服器效能
+./scripts/performance.sh report
+```
+
+選擇最適合你需求的方案，開始你的 Minecraft 伺服器之旅！�
