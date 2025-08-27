@@ -16,6 +16,11 @@
   - 網路設置和防火牆配置
   - 常見問題解決
 
+- **[NOTIFICATION_SETUP_GUIDE.md](./NOTIFICATION_SETUP_GUIDE.md)** - 🆕 自動通知設定
+  - Discord、Telegram、Line 通知設置
+  - 自動發送連線資訊給朋友
+  - 伺服器狀態推播功能
+
 - **[NGROK_SETUP_GUIDE.md](./NGROK_SETUP_GUIDE.md)** - ngrok 詳細設置
   - 帳號註冊和信用卡綁定
   - authtoken 設置
@@ -46,6 +51,7 @@
 ## 🚀 快速導航
 
 - **新手入門**: 先看 [GAME_GUIDE.md](./GAME_GUIDE.md)
+- **自動通知設定**: 🆕 參考 [NOTIFICATION_SETUP_GUIDE.md](./NOTIFICATION_SETUP_GUIDE.md)
 - **本地部署**: 查看 [REMOTE_CONNECTION_GUIDE.md](./REMOTE_CONNECTION_GUIDE.md)
 - **雲端部署**: 參考 [AWS_DEPLOYMENT_GUIDE.md](./AWS_DEPLOYMENT_GUIDE.md)
 - **外掛管理**: 參考 [PLUGIN_MANAGER_GUIDE.md](./PLUGIN_MANAGER_GUIDE.md)

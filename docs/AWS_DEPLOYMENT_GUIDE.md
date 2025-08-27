@@ -297,13 +297,63 @@ LOG_LEVEL=WARN                  # 減少日誌輸出
 ENABLE_QUERY=true
 QUERY_PORT=25565
 
+# 🔔 通知設定（重要！讓朋友自動收到連線資訊）
+# 選擇一種或多種通知方式，詳細設定請參考 NOTIFICATION_SETUP_GUIDE.md
+
+# Discord Webhook（推薦）
+# DISCORD_WEBHOOK=https://discord.com/api/webhooks/YOUR_WEBHOOK_URL
+
+# Telegram Bot
+# TELEGRAM_BOT_TOKEN=YOUR_BOT_TOKEN
+# TELEGRAM_CHAT_ID=YOUR_CHAT_ID
+
+# Line Notify
+# LINE_NOTIFY_TOKEN=YOUR_LINE_TOKEN
+
+# 自動通知設定
+AUTO_NOTIFY_STARTUP=true
+AUTO_NOTIFY_SHUTDOWN=true
+AUTO_NOTIFY_ERRORS=true
+
 # 效能優化
 VIEW_DISTANCE=6                 # 降低視距以節省 CPU
 SIMULATION_DISTANCE=4
 NETWORK_COMPRESSION_THRESHOLD=256
 ```
 
-### 步驟 3：配置管理員和白名單
+### 步驟 3：設定自動通知（推薦）
+
+為了讓朋友們自動收到伺服器連線資訊，建議設定通知功能：
+
+#### 🎯 快速設定 Discord 通知
+
+1. **在 Discord 伺服器中設定 Webhook**：
+   ```
+   伺服器設定 → 整合 → Webhooks → 建立 Webhook
+   ```
+
+2. **複製 Webhook URL 並加入 .env**：
+   ```bash
+   nano .env
+   # 取消註解並填入你的 Webhook URL
+   DISCORD_WEBHOOK=https://discord.com/api/webhooks/YOUR_WEBHOOK_URL
+   ```
+
+3. **測試通知功能**：
+   ```bash
+   # 測試通知設定
+   ./scripts/notify.sh -t
+   ```
+
+#### 📱 其他通知方式
+
+- **Telegram**: 適合群組通知
+- **Line Notify**: 台灣用戶推薦
+- **Email**: 傳統方式
+
+**完整通知設定指南**: [NOTIFICATION_SETUP_GUIDE.md](./NOTIFICATION_SETUP_GUIDE.md)
+
+### 步驟 4：配置管理員和白名單
 
 ```bash
 # 複製管理員配置
