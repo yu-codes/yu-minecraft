@@ -21,6 +21,11 @@
   - authtoken 設置
   - 流量監控功能
 
+- **[AWS_DEPLOYMENT_GUIDE.md](./AWS_DEPLOYMENT_GUIDE.md)** - AWS 雲端部署指南
+  - 完整的 AWS 設置步驟
+  - EC2 實例配置和優化
+  - 24/7 穩定運行方案
+
 ### 🔌 外掛和管理
 - **[PLUGIN_MANAGER_GUIDE.md](./PLUGIN_MANAGER_GUIDE.md)** - 外掛管理系統
   - 外掛安裝和移除
@@ -41,7 +46,8 @@
 ## 🚀 快速導航
 
 - **新手入門**: 先看 [GAME_GUIDE.md](./GAME_GUIDE.md)
-- **遠端連線**: 查看 [REMOTE_CONNECTION_GUIDE.md](./REMOTE_CONNECTION_GUIDE.md)
+- **本地部署**: 查看 [REMOTE_CONNECTION_GUIDE.md](./REMOTE_CONNECTION_GUIDE.md)
+- **雲端部署**: 參考 [AWS_DEPLOYMENT_GUIDE.md](./AWS_DEPLOYMENT_GUIDE.md)
 - **外掛管理**: 參考 [PLUGIN_MANAGER_GUIDE.md](./PLUGIN_MANAGER_GUIDE.md)
 - **開發參考**: 閱讀 [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md)
 

@@ -87,7 +87,9 @@ yu-minecraft/
 
 ### 遠端連線設定
 
-- **詳細設置指南**: [REMOTE_CONNECTION_GUIDE.md](./docs/REMOTE_CONNECTION_GUIDE.md)
+- **本地網路設置**: [REMOTE_CONNECTION_GUIDE.md](./docs/REMOTE_CONNECTION_GUIDE.md)
+- **AWS 雲端部署**: [AWS_DEPLOYMENT_GUIDE.md](./docs/AWS_DEPLOYMENT_GUIDE.md)
+- **ngrok 隧道服務**: [NGROK_SETUP_GUIDE.md](./docs/NGROK_SETUP_GUIDE.md)
 
 ## �📧 聯絡方式
 
