@@ -159,6 +159,52 @@
             background: linear-gradient(45deg, #4CAF50, #388e3c);
         }
 
+        .btn-secondary {
+            background: linear-gradient(45deg, #6c757d, #495057);
+            padding: 8px 12px;
+            font-size: 0.9rem;
+            min-width: auto;
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(45deg, #5a6268, #3d4145);
+        }
+
+        /* 通知樣式 */
+        .notification {
+            background: white;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-left: 4px solid #007bff;
+            animation: slideIn 0.3s ease-out;
+            max-width: 300px;
+        }
+
+        .notification.success {
+            border-left-color: #28a745;
+        }
+
+        .notification.error {
+            border-left-color: #dc3545;
+        }
+
+        .notification.info {
+            border-left-color: #17a2b8;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
         .command-panel {
             background: #2d3748;
             border-radius: 15px;
@@ -240,6 +286,9 @@
     </style>
 </head>
 <body>
+    <!-- 通知容器 -->
+    <div id="notification-container" style="position: fixed; top: 20px; right: 20px; z-index: 1000;"></div>
+    
     <div class="container">
         <div class="header">
             <h1><i class="fas fa-cube"></i> Yu Minecraft Server</h1>
@@ -254,8 +303,8 @@
                     <h3>伺服器狀態</h3>
                 </div>
                 <div class="status">
-                    <div class="status-indicator status-online"></div>
-                    <span>伺服器執行中</span>
+                    <div class="status-indicator status-online" id="server-status-indicator"></div>
+                    <span id="server-status-text">伺服器執行中</span>
                 </div>
                 <div class="info-grid">
                     <div class="info-item">
@@ -267,12 +316,12 @@
                         <div class="label">最大玩家</div>
                     </div>
                     <div class="info-item">
-                        <div class="value">v1.20.1</div>
+                        <div class="value">v1.21.8</div>
                         <div class="label">伺服器版本</div>
                     </div>
                     <div class="info-item">
-                        <div class="value">72ms</div>
-                        <div class="label">延遲</div>
+                        <div class="value" id="last-update">-</div>
+                        <div class="label">最後更新</div>
                     </div>
                 </div>
             </div>
@@ -283,31 +332,31 @@
                     <i class="fas fa-chart-line"></i>
                     <h3>系統資源</h3>
                 </div>
-                <div style="margin-bottom: 15px;">
+                <div class="resource-item" style="margin-bottom: 15px;">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
                         <span>CPU使用率</span>
-                        <span>45%</span>
+                        <span class="progress-text" id="cpu-usage">0%</span>
                     </div>
                     <div class="progress-bar">
-                        <div class="progress-fill" style="width: 45%"></div>
+                        <div class="progress-fill" style="width: 0%"></div>
                     </div>
                 </div>
-                <div style="margin-bottom: 15px;">
+                <div class="resource-item" style="margin-bottom: 15px;">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
                         <span>記憶體使用率</span>
-                        <span>68%</span>
+                        <span class="progress-text" id="memory-usage">0%</span>
                     </div>
                     <div class="progress-bar">
-                        <div class="progress-fill" style="width: 68%"></div>
+                        <div class="progress-fill" style="width: 0%"></div>
                     </div>
                 </div>
-                <div>
+                <div class="resource-item">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
                         <span>磁碟使用率</span>
-                        <span>32%</span>
+                        <span class="progress-text" id="disk-usage">0%</span>
                     </div>
                     <div class="progress-bar">
-                        <div class="progress-fill" style="width: 32%"></div>
+                        <div class="progress-fill" style="width: 0%"></div>
                     </div>
                 </div>
             </div>
@@ -319,17 +368,23 @@
                     <h3>快速操作</h3>
                 </div>
                 <div style="text-align: center;">
-                    <button class="btn btn-success" onclick="startServer()">
+                    <button class="btn btn-success" id="start-btn" onclick="startServer()">
                         <i class="fas fa-play"></i> 啟動伺服器
                     </button>
-                    <button class="btn btn-danger" onclick="stopServer()">
+                    <button class="btn btn-danger" id="stop-btn" onclick="stopServer()">
                         <i class="fas fa-stop"></i> 停止伺服器
                     </button>
-                    <button class="btn" onclick="restartServer()">
+                    <button class="btn" id="restart-btn" onclick="restartServer()">
                         <i class="fas fa-redo"></i> 重啟伺服器
                     </button>
-                    <button class="btn" onclick="backupWorld()">
+                    <button class="btn" id="backup-btn" onclick="backupWorld()">
                         <i class="fas fa-download"></i> 備份世界
+                    </button>
+                    <button class="btn" id="monitor-btn" onclick="systemMonitor()">
+                        <i class="fas fa-chart-line"></i> 系統監控
+                    </button>
+                    <button class="btn" id="optimize-btn" onclick="optimizeSystem()">
+                        <i class="fas fa-bolt"></i> 系統最佳化
                     </button>
                 </div>
             </div>
@@ -337,8 +392,15 @@
             <!-- 線上玩家卡片 -->
             <div class="card">
                 <div class="card-header">
-                    <i class="fas fa-users"></i>
-                    <h3>線上玩家</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <i class="fas fa-users"></i>
+                            <h3 style="display: inline; margin: 0;">線上玩家</h3>
+                        </div>
+                        <button class="btn-secondary" onclick="refreshPlayerList()" title="重新整理玩家列表">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
                 </div>
                 <div id="player-list">
                     <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee;">
@@ -353,6 +415,41 @@
                         <span><i class="fas fa-user"></i> Notch</span>
                         <span style="color: #4CAF50;">線上 15分鐘</span>
                     </div>
+                </div>
+            </div>
+
+            <!-- 備份管理卡片 -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-archive"></i>
+                    <h3>備份管理</h3>
+                </div>
+                <div style="text-align: center; margin-bottom: 15px;">
+                    <button class="btn btn-success" onclick="backupWorld()">
+                        <i class="fas fa-save"></i> 建立備份
+                    </button>
+                    <button class="btn" onclick="loadBackupList()">
+                        <i class="fas fa-refresh"></i> 重新載入
+                    </button>
+                </div>
+                <div id="backup-list">
+                    <p>載入中...</p>
+                </div>
+            </div>
+
+            <!-- 外掛管理卡片 -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-plug"></i>
+                    <h3>外掛管理</h3>
+                </div>
+                <div style="text-align: center; margin-bottom: 15px;">
+                    <button class="btn" onclick="loadPluginList()">
+                        <i class="fas fa-refresh"></i> 重新載入
+                    </button>
+                </div>
+                <div id="plugin-list">
+                    <p>載入中...</p>
                 </div>
             </div>
         </div>
@@ -388,12 +485,436 @@
     </div>
 
     <script>
-        // 模擬即時資料更新
-        function updatePlayerCount() {
-            const count = Math.floor(Math.random() * 5) + 1;
-            document.getElementById('online-players').textContent = count;
+        // API 基礎配置
+        const API_BASE = 'http://localhost:5001';
+        
+        // 全域狀態
+        let isLoading = false;
+        let refreshInterval;
+
+        // 工具函數
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
 
+        function formatDate(timestamp) {
+            return new Date(timestamp * 1000).toLocaleString();
+        }
+
+        // API 呼叫函數
+        async function apiCall(endpoint, method = 'GET', data = null) {
+            try {
+                const options = {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                };
+
+                if (data) {
+                    options.body = JSON.stringify(data);
+                }
+
+                const response = await fetch(`${API_BASE}/api/${endpoint}`, options);
+                return await response.json();
+            } catch (error) {
+                console.error('API 呼叫失敗:', error);
+                return { success: false, error: error.message };
+            }
+        }
+
+        // 執行腳本函數
+        async function executeScript(scriptName, args = [], buttonId = null) {
+            if (isLoading) return;
+            
+            isLoading = true;
+            
+            // 更新按鈕狀態
+            if (buttonId) {
+                const button = document.getElementById(buttonId);
+                if (button) {
+                    button.disabled = true;
+                    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 執行中...';
+                }
+            }
+
+            addLogEntry(`正在執行: ${scriptName}`);
+            
+            try {
+                const result = await apiCall('execute', 'POST', {
+                    script: scriptName,
+                    args: args
+                });
+
+                if (result.success) {
+                    addLogEntry(`✅ ${scriptName} 執行成功`);
+                    if (result.output) {
+                        addLogEntry(result.output);
+                    }
+                    
+                    // 更新狀態
+                    updateServerStatus();
+                } else {
+                    addLogEntry(`❌ ${scriptName} 執行失敗: ${result.error}`);
+                    if (result.output) {
+                        addLogEntry(result.output);
+                    }
+                }
+            } catch (error) {
+                addLogEntry(`❌ 執行 ${scriptName} 時發生錯誤: ${error.message}`);
+            }
+
+            // 恢復按鈕狀態
+            if (buttonId) {
+                const button = document.getElementById(buttonId);
+                if (button) {
+                    button.disabled = false;
+                    updateButtonTexts();
+                }
+            }
+            
+            isLoading = false;
+        }
+
+        // 更新按鈕文字
+        function updateButtonTexts() {
+            const buttons = {
+                'start-btn': '<i class="fas fa-play"></i> 啟動伺服器',
+                'stop-btn': '<i class="fas fa-stop"></i> 停止伺服器',
+                'restart-btn': '<i class="fas fa-redo"></i> 重啟伺服器',
+                'backup-btn': '<i class="fas fa-download"></i> 備份世界',
+                'monitor-btn': '<i class="fas fa-chart-line"></i> 系統監控',
+                'optimize-btn': '<i class="fas fa-bolt"></i> 系統最佳化'
+            };
+            
+            for (const [id, text] of Object.entries(buttons)) {
+                const button = document.getElementById(id);
+                if (button) {
+                    button.innerHTML = text;
+                }
+            }
+        }
+
+        // 伺服器管理功能
+        async function startServer() {
+            await executeScript('start', [], 'start-btn');
+        }
+
+        async function stopServer() {
+            if (!confirm('確定要停止伺服器嗎？')) return;
+            await executeScript('stop', [], 'stop-btn');
+        }
+
+        async function restartServer() {
+            if (!confirm('確定要重啟伺服器嗎？這可能需要幾分鐘時間。')) return;
+            addLogEntry('正在重啟伺服器...');
+            await executeScript('stop', []);
+            setTimeout(async () => {
+                await executeScript('start', [], 'restart-btn');
+            }, 5000);
+        }
+
+        async function backupWorld() {
+            await executeScript('backup', [], 'backup-btn');
+        }
+
+        async function systemMonitor() {
+            await executeScript('monitor', ['once'], 'monitor-btn');
+        }
+
+        async function optimizeSystem() {
+            if (!confirm('確定要執行系統最佳化嗎？')) return;
+            await executeScript('optimize', ['all'], 'optimize-btn');
+        }
+
+        // 狀態更新功能
+        async function updateServerStatus() {
+            try {
+                const result = await apiCall('status');
+                
+                if (result.success) {
+                    const data = result.data;
+                    
+                    // 更新伺服器狀態指示器
+                    const statusIndicator = document.getElementById('server-status-indicator');
+                    const statusText = document.getElementById('server-status-text');
+                    
+                    if (data.server_status === 'online') {
+                        statusIndicator.className = 'status-indicator status-online';
+                        statusText.textContent = '伺服器執行中';
+                    } else {
+                        statusIndicator.className = 'status-indicator status-offline';
+                        statusText.textContent = '伺服器離線';
+                    }
+                    
+                    // 更新線上玩家數
+                    if (data.players) {
+                        const onlinePlayersElement = document.getElementById('online-players');
+                        if (onlinePlayersElement) {
+                            onlinePlayersElement.textContent = data.players.online;
+                        }
+                        
+                        // 更新最大玩家數
+                        const maxPlayersElement = document.querySelector('.info-item:nth-child(2) .value');
+                        if (maxPlayersElement) {
+                            maxPlayersElement.textContent = data.players.max;
+                        }
+                        
+                        // 更新玩家列表
+                        updatePlayerList(data.players.list || []);
+                    }
+                    
+                    // 更新系統資源
+                    if (data.system_resources) {
+                        updateSystemResources(data.system_resources);
+                    }
+                    
+                    // 更新時間戳
+                    const lastUpdateElement = document.getElementById('last-update');
+                    if (lastUpdateElement) {
+                        lastUpdateElement.textContent = data.timestamp;
+                    }
+                }
+            } catch (error) {
+                console.error('更新狀態失敗:', error);
+                
+                // 如果 API 失敗，顯示離線狀態
+                const statusIndicator = document.getElementById('server-status-indicator');
+                const statusText = document.getElementById('server-status-text');
+                if (statusIndicator && statusText) {
+                    statusIndicator.className = 'status-indicator status-offline';
+                    statusText.textContent = 'API 連接失敗';
+                }
+            }
+        }
+
+        function updatePlayerList(playerList) {
+            const playerListElement = document.getElementById('player-list');
+            if (!playerListElement) return;
+            
+            if (playerList.length === 0) {
+                playerListElement.innerHTML = '<div style="text-align: center; color: #999; padding: 20px;">目前沒有玩家線上</div>';
+                return;
+            }
+            
+            let html = '';
+            playerList.forEach((player, index) => {
+                const borderStyle = index < playerList.length - 1 ? 'border-bottom: 1px solid #eee;' : '';
+                html += `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; ${borderStyle}">
+                        <div style="display: flex; flex-direction: column;">
+                            <span><i class="fas fa-user"></i> ${player.name}</span>
+                            <div style="display: flex; flex-direction: column; font-size: 0.9em; margin-top: 4px;">
+                                <span style="color: #4CAF50;">線上 ${player.online_time}</span>
+                                <span style="color: #666; font-size: 0.8em;">最後活動: ${player.last_seen}</span>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="btn-secondary" style="padding: 4px 8px; font-size: 0.8em;" 
+                                    onclick="kickPlayer('${player.name}')" title="踢出玩家">
+                                <i class="fas fa-sign-out-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            playerListElement.innerHTML = html;
+        }
+
+        async function refreshPlayerList() {
+            const button = event.target.closest('button');
+            const icon = button.querySelector('i');
+            
+            // 顯示載入動畫
+            button.disabled = true;
+            icon.classList.add('fa-spin');
+            
+            try {
+                showMessage('正在重新整理玩家列表...', 'info');
+                
+                // 調用狀態更新來獲取最新的玩家數據
+                await updateServerStatus();
+                
+                showMessage('玩家列表已更新', 'success');
+            } catch (error) {
+                console.error('重新整理玩家列表失敗:', error);
+                showMessage('重新整理玩家列表失敗', 'error');
+            } finally {
+                // 恢復按鈕狀態
+                button.disabled = false;
+                icon.classList.remove('fa-spin');
+            }
+        }
+
+        async function kickPlayer(playerName) {
+            if (!confirm(`確定要踢出玩家 "${playerName}" 嗎？`)) {
+                return;
+            }
+
+            try {
+                showMessage(`正在踢出玩家 ${playerName}...`, 'info');
+                
+                // 使用 Docker exec 執行踢出指令
+                const result = await apiCall('execute', 'POST', {
+                    script: 'monitor',
+                    args: ['kick', playerName]
+                });
+
+                if (result.success) {
+                    showMessage(`玩家 ${playerName} 已被踢出`, 'success');
+                    // 重新整理玩家列表
+                    setTimeout(() => refreshPlayerList(), 1000);
+                } else {
+                    showMessage(`踢出玩家失敗: ${result.error || '未知錯誤'}`, 'error');
+                }
+            } catch (error) {
+                console.error('踢出玩家失敗:', error);
+                showMessage('踢出玩家失敗', 'error');
+            }
+        }
+
+        function showMessage(message, type = 'info', duration = 3000) {
+            const container = document.getElementById('notification-container');
+            if (!container) return;
+
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+
+            container.appendChild(notification);
+
+            // 自動移除通知
+            setTimeout(() => {
+                notification.style.animation = 'slideIn 0.3s ease-out reverse';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, duration);
+        }
+
+        function updateSystemResources(resources) {
+            if (!resources) return;
+            
+            // 更新 CPU 使用率
+            const cpuProgress = document.querySelector('.resource-item:nth-child(1) .progress-fill');
+            const cpuText = document.getElementById('cpu-usage');
+            if (cpuProgress && cpuText && typeof resources.cpu_usage === 'number') {
+                cpuProgress.style.width = `${resources.cpu_usage}%`;
+                cpuText.textContent = `${resources.cpu_usage}%`;
+            }
+            
+            // 更新記憶體使用率
+            const memoryProgress = document.querySelector('.resource-item:nth-child(2) .progress-fill');
+            const memoryText = document.getElementById('memory-usage');
+            if (memoryProgress && memoryText && typeof resources.memory_usage === 'number') {
+                memoryProgress.style.width = `${resources.memory_usage}%`;
+                memoryText.textContent = `${resources.memory_usage}%`;
+            }
+            
+            // 更新磁盤使用率
+            const diskProgress = document.querySelector('.resource-item:nth-child(3) .progress-fill');
+            const diskText = document.getElementById('disk-usage');
+            if (diskProgress && diskText && resources.disk_info && resources.disk_info.disk_usage_percent) {
+                const diskPercent = parseInt(resources.disk_info.disk_usage_percent.replace('%', ''));
+                diskProgress.style.width = `${diskPercent}%`;
+                diskText.textContent = `${diskPercent}%`;
+            }
+        }
+
+        function updateSystemInfo(systemInfo) {
+            // 保留向後兼容性，但現在主要使用 updateSystemResources
+            if (!systemInfo) return;
+            
+            // 解析磁碟使用量（舊格式兼容）
+            if (systemInfo.disk_usage) {
+                const diskMatch = systemInfo.disk_usage.match(/(\d+)%/);
+                if (diskMatch) {
+                    const diskPercent = parseInt(diskMatch[1]);
+                    const diskProgress = document.querySelector('.resource-item:nth-child(3) .progress-fill');
+                    const diskText = document.querySelector('.resource-item:nth-child(3) .progress-text');
+                    if (diskProgress && diskText) {
+                        diskProgress.style.width = `${diskPercent}%`;
+                        diskText.textContent = `${diskPercent}%`;
+                    }
+                }
+            }
+        }
+
+        // 檔案管理功能
+        async function loadBackupList() {
+            try {
+                const result = await apiCall('files/backups');
+                
+                if (result.success) {
+                    const backups = result.data;
+                    const backupList = document.getElementById('backup-list');
+                    
+                    if (backups.length === 0) {
+                        backupList.innerHTML = '<p>尚無備份檔案</p>';
+                        return;
+                    }
+
+                    let html = '<h4>備份檔案列表:</h4>';
+                    backups.forEach(backup => {
+                        const date = formatDate(backup.modified);
+                        const size = formatBytes(backup.size);
+                        
+                        html += `
+                            <div style="padding: 10px; border: 1px solid #ddd; margin: 5px 0; border-radius: 5px;">
+                                <strong>${backup.name}</strong><br>
+                                <small>大小: ${size} | 修改時間: ${date}</small>
+                            </div>
+                        `;
+                    });
+
+                    backupList.innerHTML = html;
+                }
+            } catch (error) {
+                console.error('載入備份列表失敗:', error);
+            }
+        }
+
+        async function loadPluginList() {
+            try {
+                const result = await apiCall('files/plugins');
+                
+                if (result.success) {
+                    const plugins = result.data;
+                    const pluginList = document.getElementById('plugin-list');
+                    
+                    if (plugins.length === 0) {
+                        pluginList.innerHTML = '<p>尚未安裝任何外掛</p>';
+                        return;
+                    }
+
+                    let html = '<h4>已安裝外掛:</h4>';
+                    plugins.forEach(plugin => {
+                        if (plugin.name.endsWith('.jar')) {
+                            const size = formatBytes(plugin.size);
+                            html += `
+                                <div style="padding: 10px; border: 1px solid #ddd; margin: 5px 0; border-radius: 5px;">
+                                    <strong>${plugin.name}</strong><br>
+                                    <small>大小: ${size}</small>
+                                </div>
+                            `;
+                        }
+                    });
+
+                    pluginList.innerHTML = html || '<p>尚未安裝任何外掛</p>';
+                }
+            } catch (error) {
+                console.error('載入外掛列表失敗:', error);
+            }
+        }
+
+        // 日誌功能
         function addLogEntry(message) {
             const logs = document.getElementById('console-logs');
             const time = new Date().toLocaleTimeString();
@@ -417,40 +938,39 @@
             }
         }
 
-        function startServer() {
-            addLogEntry('正在啟動伺服器...');
-            setTimeout(() => {
-                addLogEntry('伺服器啟動成功!');
-            }, 2000);
+        // 模擬玩家數量更新
+        function updatePlayerCount() {
+            const count = Math.floor(Math.random() * 5) + 1;
+            document.getElementById('online-players').textContent = count;
         }
 
-        function stopServer() {
-            addLogEntry('正在停止伺服器...');
-            setTimeout(() => {
-                addLogEntry('伺服器安全停止.');
-            }, 2000);
+        // 初始化和定期更新
+        function startAutoRefresh() {
+            updateServerStatus();
+            loadBackupList();
+            loadPluginList();
+            
+            refreshInterval = setInterval(() => {
+                updateServerStatus();
+            }, 30000); // 每30秒更新一次
         }
 
-        function restartServer() {
-            addLogEntry('正在重啟伺服器...');
-            setTimeout(() => {
-                addLogEntry('伺服器重啟成功!');
-            }, 3000);
+        function stopAutoRefresh() {
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
         }
 
-        function backupWorld() {
-            addLogEntry('正在建立世界備份...');
-            setTimeout(() => {
-                addLogEntry('世界備份完成!');
-            }, 5000);
-        }
-
-        // 每30秒更新一次玩家數量
-        setInterval(updatePlayerCount, 30000);
-
-        // 頁面載入完成後的初始化
+        // 頁面載入完成後初始化
         document.addEventListener('DOMContentLoaded', function() {
-            addLogEntry('Web管理面板已連接到伺服器');
+            addLogEntry('Web管理面板已載入');
+            addLogEntry('連接到 Yu Minecraft 伺服器管理系統');
+            
+            // 開始自動更新
+            startAutoRefresh();
+            
+            // 頁面卸載時停止自動更新
+            window.addEventListener('beforeunload', stopAutoRefresh);
         });
     </script>
 </body>

@@ -41,22 +41,6 @@ cd yu-minecraft
 
 部署完成後，使用顯示的伺服器地址連接到 Minecraft 即可開始遊戲。
 
-### 基本操作
-
-```bash
-# 查看狀態
-docker-compose ps
-
-# 查看日誌
-docker-compose logs -f minecraft
-
-# 重啟伺服器
-docker-compose restart minecraft
-
-# 停止伺服器
-docker-compose down
-```
-
 ### 管理工具
 
 ```bash
@@ -66,7 +50,6 @@ docker-compose down
 # Web 管理介面 (Portainer)
 # 訪問：http://YOUR_SERVER_IP:9000
 ```
-
 
 ### 雲端伺服器管理
 
@@ -84,6 +67,7 @@ docker stats      # 容器資源
 ```
 
 ### 自動化腳本
+
 ```bash
 ./scripts/backup.sh      # 備份管理
 ./scripts/performance.sh # 效能監控

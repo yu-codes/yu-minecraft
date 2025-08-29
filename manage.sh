@@ -52,9 +52,10 @@ show_main_menu() {
     echo " 14) 系統維護"
     echo ""
     echo -e "${RED}🔧 高級功能${NC}"
-    echo " 15) Web管理介面"
-    echo " 16) 快速部署"
-    echo " 17) 完整系統檢查"
+    echo " 15) 啟動Web管理介面"
+    echo " 16) 停止Web管理介面"
+    echo " 17) 快速部署"
+    echo " 18) 完整系統檢查"
     echo ""
     echo " 0) 退出"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -237,19 +238,18 @@ maintenance_menu() {
 advanced_features() {
     case $1 in
         15)
-            echo -e "${GREEN}🌐 開啟Web管理介面${NC}"
-            echo "Web管理介面位址: http://localhost:8080"
-            if command -v open &> /dev/null; then
-                open http://localhost:8080
-            elif command -v xdg-open &> /dev/null; then
-                xdg-open http://localhost:8080
-            fi
+            echo -e "${GREEN}🌐 啟動Web管理介面${NC}"
+            ./scripts/start-web-simple.sh
             ;;
         16)
+            echo -e "${RED}🛑 停止Web管理介面${NC}"
+            ./scripts/stop-web-simple.sh
+            ;;
+        17)
             echo -e "${BLUE}🚀 執行快速部署${NC}"
             ./deploy.sh
             ;;
-        17)
+        18)
             system_check
             ;;
     esac
@@ -321,7 +321,7 @@ main() {
             5|6|7|8) monitoring_performance $choice ;;
             9|10|11) plugin_management $choice ;;
             12|13|14) backup_maintenance $choice ;;
-            15|16|17) advanced_features $choice ;;
+            15|16|17|18) advanced_features $choice ;;
             0)
                 echo -e "${GREEN}👋 感謝使用 Yu Minecraft Server 管理系統！${NC}"
                 exit 0

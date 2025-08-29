@@ -114,15 +114,15 @@ case $choice in
         echo "在本地環境運行 Minecraft 伺服器"
         echo
         echo "檢查 Docker 環境..."
-        if command -v docker &> /dev/null && command -v docker-compose &> /dev/null; then
+        if command -v docker &> /dev/null && docker compose version &> /dev/null; then
             echo "✅ Docker 環境正常"
             echo
             echo "啟動本地伺服器..."
-            docker-compose up -d
+            cd docker && docker compose up -d && cd ..
             echo
             echo -e "${GREEN}✅ 本地伺服器已啟動！${NC}"
             echo "連線地址: localhost:25565"
-            echo "管理介面: http://localhost:9000"
+            echo "Web管理介面: http://localhost:8080"
         else
             echo -e "${RED}❌ Docker 或 Docker Compose 未安裝${NC}"
             echo "請先安裝 Docker Desktop"
