@@ -7,58 +7,71 @@
 set -e
 
 # 配置
-BACKUP_DIR="$(dirname "$0")/../backups"
-WORLDS_DIR="$(dirname "$0")/../worlds"
-CONFIG_DIR="$(dirname "$0")/../config"
-PLUGINS_DIR="$(dirname "$0")/../plugins"
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+WORLDS_DIR="$PROJECT_ROOT/worlds"
+CONFIG_DIR="$PROJECT_ROOT/config"
+BACKUP_DIR="$PROJECT_ROOT/backups"
 DATE=$(date +"%Y%m%d_%H%M%S")
+
+# 獲取當前世界名稱
+get_current_world() {
+    if [ -L "$WORLDS_DIR/current" ]; then
+        basename "$(readlink "$WORLDS_DIR/current")"
+    else
+        echo "default"
+    fi
+}
+
+CURRENT_WORLD=$(get_current_world)
 BACKUP_NAME="minecraft_backup_${DATE}"
 
-echo "💾 開始備份 Yu Minecraft 伺服器..."
+echo "💾 開始備份世界: $CURRENT_WORLD"
 
 # 創建備份目錄
 mkdir -p "$BACKUP_DIR"
 
 # 切換到專案目錄
-cd "$(dirname "$0")/.."
+cd "$PROJECT_ROOT"
 
 # 檢查是否有資料需要備份
-if [ ! -d "$WORLDS_DIR" ] && [ ! -d "$CONFIG_DIR" ] && [ ! -d "$PLUGINS_DIR" ]; then
+if [ ! -d "$WORLDS_DIR" ] && [ ! -d "$CONFIG_DIR" ]; then
     echo "⚠️  警告: 沒有找到需要備份的資料"
     exit 1
 fi
 
 # 如果伺服器正在執行，先儲存世界資料
-cd docker
+cd "$PROJECT_ROOT/docker"
 if docker compose ps | grep -q "Up"; then
     echo "💾 伺服器正在執行，儲存目前世界資料..."
-    docker compose exec -T minecraft rcon-cli --host localhost --port 25575 --password yu-minecraft-2023 "save-all" || true
-    docker compose exec -T minecraft rcon-cli --host localhost --port 25575 --password yu-minecraft-2023 "save-off" || true
+    docker compose exec -T minecraft rcon-cli --host localhost --port 25575 --password yu-minecraft-2025 "save-all" || true
+    docker compose exec -T minecraft rcon-cli --host localhost --port 25575 --password yu-minecraft-2025 "save-off" || true
     
     # 等待儲存完成
     sleep 5
     
     echo "📁 創建備份..."
     # 創建備份壓縮包
-    cd ..
+    cd "$PROJECT_ROOT"
     tar -czf "$BACKUP_DIR/$BACKUP_NAME.tar.gz" \
         --exclude="*.log" \
         --exclude="cache" \
         --exclude="crash-reports" \
-        worlds/ config/ plugins/ 2>/dev/null || true
+        --exclude="current" \
+        worlds/ config/ 2>/dev/null || true
     
     # 重新啟用自動儲存
-    cd docker
-    docker compose exec -T minecraft rcon-cli --host localhost --port 25575 --password yu-minecraft-2023 "save-on" || true
+    cd "$PROJECT_ROOT/docker"
+    docker compose exec -T minecraft rcon-cli --host localhost --port 25575 --password yu-minecraft-2025 "save-on" || true
     
 else
     echo "📁 伺服器未執行，直接創建備份..."
-    cd ..
+    cd "$PROJECT_ROOT"
     tar -czf "$BACKUP_DIR/$BACKUP_NAME.tar.gz" \
         --exclude="*.log" \
         --exclude="cache" \
         --exclude="crash-reports" \
-        worlds/ config/ plugins/ 2>/dev/null || true
+        --exclude="current" \
+        worlds/ config/ 2>/dev/null || true
 fi
 
 # 檢查備份是否成功創建

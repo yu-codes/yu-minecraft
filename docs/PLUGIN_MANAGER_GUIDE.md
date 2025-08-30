@@ -37,8 +37,8 @@ bash scripts/plugins.sh help
 
 | 外掛名稱 | 描述 | 狀態 |
 |---------|------|------|
-| EssentialsX | 基礎伺服器指令套件 | ✅ 已安裝 |
-| Vault | 經濟系統API | ✅ 已安裝 |
+| EssentialsX | 基礎伺服器指令套件 | 📦 可安裝 |
+| Vault | 經濟系統API | 📦 可安裝 |
 | LuckPerms | 權限管理系統 | 📦 可安裝 |
 | ProtocolLib | 協議庫 | 📦 可安裝 |
 | ChestShop | 商店系統 | 📦 可安裝 |

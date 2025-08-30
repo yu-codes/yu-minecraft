@@ -6,8 +6,9 @@
 
 set -e
 
-# 設定腳本目錄
+# 設定腳本目錄和專案根目錄
 SCRIPT_DIR="$(dirname "$0")"
+PROJECT_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 
 echo "🎮 啟動 Yu Minecraft 伺服器..."
 
@@ -24,7 +25,7 @@ if ! docker compose version &> /dev/null; then
 fi
 
 # 切換到專案目錄
-cd "$(dirname "$0")/.."
+cd "$PROJECT_ROOT"
 
 # 檢查docker-compose.yml是否存在
 if [ ! -f "docker/docker-compose.yml" ]; then
@@ -35,17 +36,97 @@ fi
 # 創建必要的目錄
 mkdir -p worlds plugins config logs
 
+# 檢查 Docker 容器狀態並決定是否需要重建
+check_and_rebuild_container() {
+    echo "🔍 檢查容器狀態..."
+    
+    # 檢查容器是否存在
+    if ! docker ps -a --format "table {{.Names}}" | grep -q "yu-minecraft-server"; then
+        echo "⚠️ 容器不存在，需要建立新容器"
+        return 0  # 需要重建
+    fi
+    
+    # 檢查容器是否運行中
+    if docker ps --format "table {{.Names}}" | grep -q "yu-minecraft-server"; then
+        echo "✅ 容器已在運行中"
+        echo "📊 容器狀態:"
+        docker ps --filter "name=yu-minecraft-server" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+        
+        read -p "是否要重啟容器? (y/N): " restart_confirm
+        if [[ "$restart_confirm" =~ ^[Yy]$ ]]; then
+            echo "🔄 重啟容器..."
+            docker compose restart minecraft
+            return 1  # 不需要重建，只是重啟
+        else
+            echo "ℹ️ 容器繼續運行"
+            return 1  # 不需要重建
+        fi
+    fi
+    
+    # 容器存在但未運行
+    echo "⚠️ 容器存在但未運行，檢查狀態..."
+    docker ps -a --filter "name=yu-minecraft-server" --format "table {{.Names}}\t{{.Status}}"
+    
+    read -p "是否要重建容器? (Y/n): " rebuild_confirm
+    if [[ "$rebuild_confirm" =~ ^[Nn]$ ]]; then
+        echo "🔄 嘗試啟動現有容器..."
+        docker compose start minecraft
+        return 1  # 不重建，嘗試啟動
+    else
+        echo "🔨 將重建容器..."
+        return 0  # 需要重建
+    fi
+}
+
+# 檢查世界符號連結
+check_world_symlink() {
+    echo "🌍 檢查世界符號連結..."
+    
+    if [ ! -L "$PROJECT_ROOT/worlds/current" ]; then
+        echo "⚠️ 警告: 未設置當前世界符號連結"
+        echo "💡 建議先使用世界管理功能選擇一個世界"
+        
+        # 列出可用世界
+        worlds_dir="$PROJECT_ROOT/worlds"
+        if [ -d "$worlds_dir" ]; then
+            available_worlds=$(find "$worlds_dir" -maxdepth 1 -type d -not -name "current" -exec basename {} \; | grep -v "^worlds$" | head -5)
+            if [ -n "$available_worlds" ]; then
+                echo "📋 可用世界:"
+                echo "$available_worlds" | sed 's/^/   • /'
+                echo ""
+                read -p "是否繼續啟動? (Y/n): " continue_confirm
+                if [[ "$continue_confirm" =~ ^[Nn]$ ]]; then
+                    echo "❌ 啟動已取消"
+                    exit 1
+                fi
+            fi
+        fi
+    else
+        current_world=$(basename "$(readlink "$(dirname "$0")/../../worlds/current")")
+        echo "✅ 當前世界: $current_world"
+    fi
+}
+
 # 啟動服務
-echo "📦 建構並啟動容器..."
-cd docker
-docker compose up -d --build
+echo "📦 啟動 Minecraft 伺服器..."
+
+# 檢查世界設置
+check_world_symlink
+
+# 檢查並決定是否重建容器
+if check_and_rebuild_container; then
+    echo "🔨 建構並啟動容器..."
+    docker compose -f docker/docker-compose.yml up -d --build
+else
+    echo "⏳ 等待現有容器穩定..."
+fi
 
 # 等待服務啟動
 echo "⏳ 等待服務啟動..."
 sleep 10
 
 # 檢查服務狀態
-if docker compose ps | grep -q "Up"; then
+if docker compose -f docker/docker-compose.yml ps | grep -q "Up"; then
     echo "✅ Yu Minecraft 伺服器啟動成功!"
     
     # 獲取伺服器 IP 地址

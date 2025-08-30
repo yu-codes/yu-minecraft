@@ -185,10 +185,74 @@ export_performance_data() {
     fi
 }
 
+# 即時監控模式
+real_time_monitoring() {
+    echo "🔄 開始即時效能監控..."
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "按 'q' 或 Ctrl+C 停止監控"
+    echo ""
+    
+    # 創建臨時檔案來檢查按鍵輸入
+    local temp_input="/tmp/performance_monitor_$$"
+    local monitoring=true
+    
+    # 設置 trap 來處理中斷信號
+    trap 'monitoring=false; echo -e "\n🛑 監控已停止"; cleanup_monitoring; exit 0' INT TERM
+    
+    # 背景讀取輸入
+    read_input() {
+        while $monitoring; do
+            read -t 1 -n 1 key 2>/dev/null || continue
+            if [[ "$key" == "q" ]] || [[ "$key" == "Q" ]]; then
+                monitoring=false
+                echo -e "\n🛑 用戶停止監控"
+                break
+            fi
+        done
+    }
+    
+    cleanup_monitoring() {
+        rm -f "$temp_input" 2>/dev/null || true
+        stty echo 2>/dev/null || true
+    }
+    
+    # 開始背景輸入監聽
+    read_input &
+    local input_pid=$!
+    
+    # 主監控循環
+    local count=0
+    while $monitoring; do
+        clear
+        echo "🔄 Yu Minecraft 即時效能監控 (第 $((++count)) 次)"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "按 'q' 退出監控 | 更新間隔: 5秒"
+        echo ""
+        
+        log_performance
+        
+        # 等待5秒或檢查是否需要停止
+        for i in {1..5}; do
+            if ! $monitoring; then
+                break
+            fi
+            sleep 1
+        done
+    done
+    
+    # 清理
+    kill $input_pid 2>/dev/null || true
+    cleanup_monitoring
+    echo "📊 監控會話結束"
+}
+
 # 主程式
 case "${1:-log}" in
     "log")
         log_performance
+        ;;
+    "monitor"|"realtime")
+        real_time_monitoring
         ;;
     "report")
         generate_performance_report
@@ -200,14 +264,15 @@ case "${1:-log}" in
         export_performance_data
         ;;
     "help"|"-h"|"--help")
-        echo "使用方式: $0 [log|report|cleanup|export|help]"
+        echo "使用方式: $0 [log|monitor|report|cleanup|export|help]"
         echo ""
         echo "選項:"
-        echo "  log     記錄目前效能資料 (預設)"
-        echo "  report  生成效能分析報告"
-        echo "  cleanup 清理舊記錄檔案"
-        echo "  export  匯出效能資料為CSV"
-        echo "  help    顯示此說明"
+        echo "  log      記錄目前效能資料 (預設)"
+        echo "  monitor  即時效能監控 (可按 q 退出)"
+        echo "  report   生成效能分析報告"
+        echo "  cleanup  清理舊記錄檔案"
+        echo "  export   匯出效能資料為CSV"
+        echo "  help     顯示此說明"
         ;;
     *)
         echo "❌ 未知選項: $1"

@@ -14,6 +14,7 @@
 
 - [快速開始](#-快速開始)
 - [伺服器管理](#-伺服器管理)
+- [Aternos 世界轉移](#-aternos-世界轉移)
 - [功能概覽](#-功能概覽)
 - [詳細文件](#-詳細文件)
 
@@ -72,23 +73,77 @@ docker stats      # 容器資源
 ./scripts/backup.sh      # 備份管理
 ./scripts/performance.sh # 效能監控
 ./scripts/optimize.sh    # 系統優化
-./scripts/plugins.sh     # 外掛管理
-./scripts/notify.sh      # 通知服務
 ```
+
+## 🔄 Aternos 世界轉移
+
+### 世界管理系統
+
+本專案支援多世界管理，所有世界（本地和 Aternos）都存放在 `worlds/` 目錄下：
+
+```bash
+# 查看所有可用世界
+./world-manager.sh list
+
+# 查看當前狀態
+./world-manager.sh status
+```
+
+### 從 Aternos 匯入世界
+
+```bash
+# 1. 從 Aternos 下載世界檔案到專案根目錄
+# 2. 匯入世界
+./world-manager.sh import world.zip my-aternos-world
+
+# 3. 切換到匯入的世界
+./world-manager.sh select my-aternos-world
+
+# 4. 啟動伺服器
+docker-compose up -d
+```
+
+### 切換世界
+
+```bash
+# 列出所有世界並選擇
+./world-manager.sh select
+
+# 直接切換到指定世界
+./world-manager.sh select world-name
+```
+
+### 從本地匯出到 Aternos
+
+```bash
+# 1. 確保要匯出的世界為當前世界
+./world-manager.sh select my-world
+
+# 2. 壓縮當前世界
+cd worlds/current
+zip -r ../../my-world-export.zip *
+
+# 3. 在 Aternos 控制面板上傳 my-world-export.zip
+```
+
+所有世界都使用相同的 Docker 部署方式，透過符號連結切換，簡單高效。
 
 ## 📚 詳細文件
 
 ### 部署指南
+
 - [Oracle Cloud 部署](./docs/ORACLE_CLOUD_GUIDE.md) - 免費雲端部署詳細教學
 - [遠端連線方案](./docs/REMOTE_CONNECTION_GUIDE.md) - 所有部署方案比較
 - [AWS 部署指南](./docs/AWS_DEPLOYMENT_GUIDE.md) - AWS EC2 部署教學
 
 ### 功能說明
+
 - [遊戲設置指南](./docs/GAME_GUIDE.md) - 遊戲配置和玩家管理
 - [外掛管理指南](./docs/PLUGIN_MANAGER_GUIDE.md) - 外掛安裝和管理
 - [通知設置指南](./docs/NOTIFICATION_SETUP_GUIDE.md) - 自動通知配置
 
 ### 進階功能
+
 - [Ngrok 設置指南](./docs/NGROK_SETUP_GUIDE.md) - 臨時公網連線
 - [專案結構說明](./docs/PROJECT_STRUCTURE.md) - 開發和自訂指南
 - [版本更新日誌](./docs/VERSION_1.21.8.md) - 1.21.8 新特性

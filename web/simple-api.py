@@ -21,13 +21,13 @@ SCRIPTS_DIR = PROJECT_ROOT / 'scripts'
 
 # 允許的腳本列表
 ALLOWED_SCRIPTS = {
-    'monitor': 'monitor.sh',
-    'backup': 'backup.sh', 
-    'start': 'start.sh',
-    'stop': 'stop.sh',
-    'performance': 'performance.sh',
-    'plugins': 'plugins.sh',
-    'optimize': 'optimize.sh'
+    'monitor': 'monitoring/monitor.sh',
+    'backup': 'backup/backup.sh', 
+    'start': 'server/start.sh',
+    'stop': 'server/stop.sh',
+    'performance': 'monitoring/performance.sh',
+    'plugins': 'plugins/plugins.sh',
+    'optimize': 'monitoring/optimize.sh'
 }
 
 class MinecraftAPIHandler(http.server.BaseHTTPRequestHandler):

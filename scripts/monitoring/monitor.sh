@@ -31,6 +31,41 @@ check_server_status() {
     fi
 }
 
+# 獲取最大玩家數 (從當前世界配置)
+get_max_players() {
+    local current_world_dir=""
+    local server_properties=""
+    
+    # 檢查當前世界
+    if [ -L "$(dirname "$0")/../../worlds/current" ]; then
+        current_world_dir=$(readlink "$(dirname "$0")/../../worlds/current")
+        current_world_dir=$(basename "$current_world_dir")
+        
+        # 嘗試從世界特定配置讀取
+        local world_config="$(dirname "$0")/../../worlds/$current_world_dir/server.properties"
+        if [ -f "$world_config" ]; then
+            server_properties="$world_config"
+        fi
+    fi
+    
+    # 如果沒有世界特定配置，使用全域配置
+    if [ -z "$server_properties" ] || [ ! -f "$server_properties" ]; then
+        server_properties="$(dirname "$0")/../../config/global/server.properties"
+    fi
+    
+    # 最後備用選項
+    if [ ! -f "$server_properties" ]; then
+        server_properties="$(dirname "$0")/../../config/server.properties"
+    fi
+    
+    # 讀取最大玩家數
+    if [ -f "$server_properties" ]; then
+        grep "max-players=" "$server_properties" 2>/dev/null | cut -d'=' -f2 | tr -d ' ' || echo "20"
+    else
+        echo "20"
+    fi
+}
+
 # 獲取線上玩家數量
 get_online_players() {
     cd "$(dirname "$0")/../docker"
@@ -95,6 +130,7 @@ generate_report() {
     local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
     local server_status=$(check_server_status)
     local online_players=$(get_online_players)
+    local max_players=$(get_max_players)
     local system_resources=$(get_system_resources)
     local container_health=$(check_container_health)
     
@@ -102,14 +138,21 @@ generate_report() {
     IFS=',' read -r cpu_usage memory_usage disk_usage <<< "$system_resources"
     IFS=',' read -r container_cpu container_memory <<< "$container_health"
     
+    # 獲取當前世界信息
+    local current_world="未知"
+    if [ -L "$(dirname "$0")/../../worlds/current" ]; then
+        current_world=$(basename "$(readlink "$(dirname "$0")/../../worlds/current")")
+    fi
+    
     # 記錄到監控日誌
-    echo "[$timestamp] STATUS:$server_status PLAYERS:$online_players CPU:$cpu_usage% MEM:$memory_usage% DISK:$disk_usage% CONTAINER_CPU:$container_cpu% CONTAINER_MEM:$container_memory%" >> "$MONITOR_LOG"
+    echo "[$timestamp] WORLD:$current_world STATUS:$server_status PLAYERS:$online_players/$max_players CPU:$cpu_usage% MEM:$memory_usage% DISK:$disk_usage% CONTAINER_CPU:$container_cpu% CONTAINER_MEM:$container_memory%" >> "$MONITOR_LOG"
     
     # 輸出到控制台
     echo "📊 監控報告 - $timestamp"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "🌍 當前世界: $current_world"
     echo "🟢 伺服器狀態: $server_status"
-    echo "👥 線上玩家: $online_players"
+    echo "👥 線上玩家: $online_players / $max_players"
     echo "💻 系統 CPU: $cpu_usage%"
     echo "🧠 系統記憶體: $memory_usage%"
     echo "💾 磁碟使用: $disk_usage%"

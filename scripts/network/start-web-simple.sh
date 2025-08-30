@@ -20,7 +20,7 @@ if ! command -v python3 &> /dev/null; then
 fi
 
 # 獲取專案目錄
-PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+PROJECT_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 WEB_DIR="$PROJECT_DIR/web"
 
 echo -e "${YELLOW}📁 專案目錄: $PROJECT_DIR${NC}"
@@ -45,7 +45,7 @@ fi
 
 # 啟動簡單的 HTTP 服務器來提供靜態檔案
 echo -e "${YELLOW}🌐 啟動 Web 服務器...${NC}"
-python3 -m http.server 8080 &
+python3 -m http.server 8081 &
 WEB_PID=$!
 
 # 等待 Web 服務啟動
@@ -68,8 +68,8 @@ echo ""
 echo -e "${GREEN}🎉 服務啟動成功！${NC}"
 echo "================================================"
 echo -e "${BLUE}📱 Web 管理介面:${NC}"
-echo "   🏠 本地訪問: http://localhost:8080"
-echo "   🌐 區域網路: http://$(hostname -I | awk '{print $1}' 2>/dev/null || echo 'localhost'):8080"
+echo "   🏠 本地訪問: http://localhost:8081"
+echo "   🌐 區域網路: http://$(hostname -I | awk '{print $1}' 2>/dev/null || echo 'localhost'):8081"
 echo ""
 echo -e "${BLUE}🔧 API 服務:${NC}"
 echo "   📡 API 端點: http://localhost:5001/api"
@@ -84,11 +84,11 @@ echo ""
 if [[ "$1" != "--no-browser" ]]; then
     echo -e "${YELLOW}🌐 正在開啟瀏覽器...${NC}"
     if command -v open &> /dev/null; then
-        open http://localhost:8080
+        open http://localhost:8081
     elif command -v xdg-open &> /dev/null; then
-        xdg-open http://localhost:8080
+        xdg-open http://localhost:8081
     else
-        echo "請手動開啟瀏覽器並訪問: http://localhost:8080"
+        echo "請手動開啟瀏覽器並訪問: http://localhost:8081"
     fi
 fi
 

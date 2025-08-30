@@ -31,6 +31,16 @@
   - EC2 實例配置和優化
   - 24/7 穩定運行方案
 
+- **[ATERNOS_GUIDE.md](./ATERNOS_GUIDE.md)** - 🆕 Aternos 免費託管指南
+  - 免費Minecraft服務器託管
+  - 註冊與設置教學
+  - 本地與雲端自由移轉
+
+- **[ORACLE_CLOUD_GUIDE.md](./ORACLE_CLOUD_GUIDE.md)** - Oracle Cloud 免費部署
+  - 永久免費雲端部署
+  - 高性能配置指南
+  - 進階網路設置
+
 ### 🔌 外掛和管理
 - **[PLUGIN_MANAGER_GUIDE.md](./PLUGIN_MANAGER_GUIDE.md)** - 外掛管理系統
   - 外掛安裝和移除
@@ -52,8 +62,9 @@
 
 - **新手入門**: 先看 [GAME_GUIDE.md](./GAME_GUIDE.md)
 - **自動通知設定**: 🆕 參考 [NOTIFICATION_SETUP_GUIDE.md](./NOTIFICATION_SETUP_GUIDE.md)
+- **免費雲端託管**: 🆕 查看 [ATERNOS_GUIDE.md](./ATERNOS_GUIDE.md)
 - **本地部署**: 查看 [REMOTE_CONNECTION_GUIDE.md](./REMOTE_CONNECTION_GUIDE.md)
-- **雲端部署**: 參考 [AWS_DEPLOYMENT_GUIDE.md](./AWS_DEPLOYMENT_GUIDE.md)
+- **雲端部署**: 參考 [AWS_DEPLOYMENT_GUIDE.md](./AWS_DEPLOYMENT_GUIDE.md) 或 [ORACLE_CLOUD_GUIDE.md](./ORACLE_CLOUD_GUIDE.md)
 - **外掛管理**: 參考 [PLUGIN_MANAGER_GUIDE.md](./PLUGIN_MANAGER_GUIDE.md)
 - **開發參考**: 閱讀 [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md)
 
