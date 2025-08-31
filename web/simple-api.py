@@ -27,7 +27,8 @@ ALLOWED_SCRIPTS = {
     'stop': 'server/stop.sh',
     'performance': 'monitoring/performance.sh',
     'plugins': 'plugins/plugins.sh',
-    'optimize': 'monitoring/optimize.sh'
+    'optimize': 'monitoring/optimize.sh',
+    'player-info': 'monitoring/player-info.sh'
 }
 
 class MinecraftAPIHandler(http.server.BaseHTTPRequestHandler):
@@ -130,67 +131,47 @@ class MinecraftAPIHandler(http.server.BaseHTTPRequestHandler):
             # 獲取線上玩家詳細信息
             if server_status == 'online':
                 try:
-                    # 嘗試從玩家數據目錄獲取信息
-                    playerdata_dir = PROJECT_ROOT / 'worlds' / 'playerdata'
-                    if playerdata_dir.exists():
-                        import os
-                        import time
-                        import json
-                        from datetime import datetime
+                    # 使用專門的玩家資訊腳本
+                    player_script = SCRIPTS_DIR / 'monitoring' / 'player-info.sh'
+                    if player_script.exists():
+                        player_result = subprocess.run([
+                            'bash', str(player_script), 'json'
+                        ], cwd=PROJECT_ROOT, capture_output=True, text=True, timeout=10)
                         
-                        # 獲取最近活躍的玩家檔案
-                        player_files = []
-                        for filename in os.listdir(playerdata_dir):
-                            if filename.endswith('.dat'):
-                                filepath = playerdata_dir / filename
-                                try:
-                                    # 獲取檔案修改時間
-                                    mtime = os.path.getmtime(filepath)
-                                    # 如果在最近 10 分鐘內修改過，認為是線上玩家
-                                    if time.time() - mtime < 600:  # 10 分鐘
-                                        player_uuid = filename.replace('.dat', '')
-                                        
-                                        # 嘗試從 usercache.json 獲取玩家名稱
-                                        player_name = "Unknown"
-                                        try:
-                                            # 首先檢查項目根目錄的 usercache.json
-                                            usercache_path = PROJECT_ROOT / 'usercache.json'
-                                            if not usercache_path.exists():
-                                                # 如果不存在，檢查 worlds 目錄
-                                                usercache_path = PROJECT_ROOT / 'worlds' / 'usercache.json'
+                        if player_result.returncode == 0:
+                            try:
+                                import json as json_module
+                                player_data = json_module.loads(player_result.stdout)
+                                if player_data.get('success'):
+                                    online_players = player_data.get('online_count', 0)
+                                    player_list = player_data.get('players', [])
+                                else:
+                                    print(f"玩家腳本執行失敗: {player_data.get('error', '未知錯誤')}")
+                            except json_module.JSONDecodeError as e:
+                                print(f"解析玩家資料JSON失敗: {e}")
+                        else:
+                            print(f"玩家資訊腳本執行失敗: {player_result.stderr}")
+                    
+                    # 如果腳本執行失敗，嘗試備用方法
+                    if online_players == 0 and len(player_list) == 0:
+                        # 嘗試從當前世界的玩家數據目錄獲取信息
+                        playerdata_dir = PROJECT_ROOT / 'worlds' / 'current' / 'playerdata'
+                        if playerdata_dir.exists():
+                            import os
+                            import time
+                            from datetime import datetime
+                            
+                            # 獲取最近活躍的玩家檔案
+                            for filename in os.listdir(playerdata_dir):
+                                if filename.endswith('.dat'):
+                                    filepath = playerdata_dir / filename
+                                    try:
+                                        # 獲取檔案修改時間
+                                        mtime = os.path.getmtime(filepath)
+                                        # 如果在最近 10 分鐘內修改過，認為是線上玩家
+                                        if time.time() - mtime < 600:  # 10 分鐘
+                                            player_uuid = filename.replace('.dat', '')
                                             
-                                            if usercache_path.exists():
-                                                with open(usercache_path, 'r') as f:
-                                                    cache = json.load(f)
-                                                for entry in cache:
-                                                    if entry.get('uuid', '').replace('-', '') == player_uuid.replace('-', ''):
-                                                        player_name = entry.get('name', 'Unknown')
-                                                        break
-                                            else:
-                                                # 如果沒有 usercache.json，嘗試從 whitelist.json 獲取
-                                                whitelist_path = PROJECT_ROOT / 'config' / 'whitelist.json'
-                                                if whitelist_path.exists():
-                                                    with open(whitelist_path, 'r') as f:
-                                                        whitelist = json.load(f)
-                                                    for entry in whitelist:
-                                                        if entry.get('uuid', '').replace('-', '') == player_uuid.replace('-', ''):
-                                                            player_name = entry.get('name', 'Unknown')
-                                                            break
-                                                
-                                                # 如果還是沒有找到，創建一個基於UUID的固定名稱
-                                                if player_name == "Unknown":
-                                                    # 為常見的UUID創建固定的玩家名稱映射
-                                                    uuid_to_name = {
-                                                        '3d2aeac1-4ea1-4d92-b48b-f71704c08622': 'Steve',
-                                                        '3d2aeac14ea14d92b48bf71704c08622': 'Steve',
-                                                        '5ee80fec-d63f-41e7-9228-8904ae652583': 'Alex',
-                                                        '5ee80fecd63f41e792288904ae652583': 'Alex',
-                                                        '805ff403-650c-46f7-92d7-7c55858d4cf2': 'Herobrine',
-                                                        '805ff403650c46f792d77c55858d4cf2': 'Herobrine'
-                                                    }
-                                                    player_name = uuid_to_name.get(player_uuid.replace('-', ''), f"Player_{player_uuid[:8]}")
-                                        except Exception as e:
-                                            print(f"獲取玩家名稱錯誤: {e}")
                                             # 使用固定的名稱映射作為備用
                                             uuid_to_name = {
                                                 '3d2aeac1-4ea1-4d92-b48b-f71704c08622': 'Steve',
@@ -201,68 +182,32 @@ class MinecraftAPIHandler(http.server.BaseHTTPRequestHandler):
                                                 '805ff403650c46f792d77c55858d4cf2': 'Herobrine'
                                             }
                                             player_name = uuid_to_name.get(player_uuid.replace('-', ''), f"Player_{player_uuid[:8]}")
-                                        
-                                        # 計算線上時間
-                                        online_time = time.time() - mtime
-                                        if online_time < 60:
-                                            time_str = f"{int(online_time)}秒"
-                                        elif online_time < 3600:
-                                            time_str = f"{int(online_time/60)}分鐘"
-                                        else:
-                                            time_str = f"{int(online_time/3600)}小時{int((online_time%3600)/60)}分鐘"
-                                        
-                                        player_list.append({
-                                            'name': player_name,
-                                            'uuid': player_uuid,
-                                            'online_time': time_str,
-                                            'last_seen': datetime.fromtimestamp(mtime).strftime('%H:%M:%S')
-                                        })
-                                except Exception as e:
-                                    print(f"處理玩家檔案 {filename} 錯誤: {e}")
-                    
-                    online_players = len(player_list)
-                    
-                    # 如果沒有從檔案系統獲取到玩家，嘗試使用 monitor 腳本
-                    if online_players == 0:
-                        monitor_result = subprocess.run([
-                            'bash', str(SCRIPTS_DIR / 'monitor.sh'), 'players'
-                        ], cwd=PROJECT_ROOT, capture_output=True, text=True, timeout=5)
-                        
-                        if monitor_result.returncode == 0 and 'players online' in monitor_result.stdout.lower():
-                            # 嘗試解析玩家數量
-                            import re
-                            match = re.search(r'(\d+)\s+players?\s+online', monitor_result.stdout.lower())
-                            if match:
-                                online_players = int(match.group(1))
-                                # 如果有玩家但無法獲取詳細信息，創建示例數據
-                                if online_players > 0:
-                                    for i in range(min(online_players, 3)):  # 最多顯示3個示例玩家
-                                        player_list.append({
-                                            'name': f'Player_{i+1}',
-                                            'uuid': f'unknown-{i+1}',
-                                            'online_time': '未知',
-                                            'last_seen': datetime.now().strftime('%H:%M:%S')
-                                        })
+                                            
+                                            # 計算線上時間
+                                            online_time = time.time() - mtime
+                                            if online_time < 60:
+                                                time_str = f"{int(online_time)}秒"
+                                            elif online_time < 3600:
+                                                time_str = f"{int(online_time/60)}分鐘"
+                                            else:
+                                                time_str = f"{int(online_time/3600)}小時{int((online_time%3600)/60)}分鐘"
+                                            
+                                            player_list.append({
+                                                'name': player_name,
+                                                'uuid': player_uuid,
+                                                'online_time': time_str,
+                                                'last_seen': datetime.fromtimestamp(mtime).strftime('%H:%M:%S')
+                                            })
+                                    except Exception as e:
+                                        print(f"處理玩家檔案 {filename} 錯誤: {e}")
+                            
+                            online_players = len(player_list)
                                         
                 except Exception as e:
                     print(f"獲取玩家信息錯誤: {e}")
-                    # 如果無法獲取真實數據，提供示例數據
-                    if server_status == 'online':
-                        player_list = [
-                            {
-                                'name': 'Steve',
-                                'uuid': 'example-1',
-                                'online_time': '2小時15分鐘',
-                                'last_seen': '14:30:25'
-                            },
-                            {
-                                'name': 'Alex', 
-                                'uuid': 'example-2',
-                                'online_time': '45分鐘',
-                                'last_seen': '15:45:10'
-                            }
-                        ]
-                        online_players = len(player_list)
+                    # 如果無法獲取真實數據，提供空列表
+                    player_list = []
+                    online_players = 0
             else:
                 online_players = 0
 

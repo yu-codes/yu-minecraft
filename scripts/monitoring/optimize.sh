@@ -7,8 +7,8 @@
 set -e
 
 # 配置
-CONFIG_DIR="$(dirname "$0")/../config"
-OPTIMIZATION_LOG="$(dirname "$0")/../logs/optimization.log"
+CONFIG_DIR="$(dirname "$0")/../../config"
+OPTIMIZATION_LOG="$(dirname "$0")/../../logs/optimization.log"
 
 echo "⚡ Yu Minecraft 伺服器效能最佳化"
 
@@ -261,7 +261,7 @@ EOF
 optimize_jvm_settings() {
     echo "🔧 最佳化JVM設定..."
     
-    local compose_file="$(dirname "$0")/../docker/docker-compose.yml"
+    local compose_file="$(dirname "$0")/../../docker/docker-compose.yml"
     local backup_compose="$compose_file.backup.$(date +%Y%m%d_%H%M%S)"
     
     if [ -f "$compose_file" ]; then
@@ -270,7 +270,7 @@ optimize_jvm_settings() {
         log_optimization "已備份docker-compose.yml到 $backup_compose"
         
         # 檢查記憶體設定
-        local memory_setting=$(grep "MEMORY=" "$(dirname "$0")/../.env" | cut -d'=' -f2 || echo "2G")
+        local memory_setting=$(grep "MEMORY=" "$(dirname "$0")/../../config/global/global.env" | cut -d'=' -f2 || echo "2G")
         
         # 根據記憶體設定調整JVM參數
         local xmx_setting=""
@@ -302,7 +302,7 @@ optimize_jvm_settings() {
         log_optimization "JVM記憶體設定: Xms=$xms_setting, Xmx=$xmx_setting"
         
         # 更新Dockerfile以使用最佳化的JVM參數
-        local dockerfile="$(dirname "$0")/../docker/Dockerfile"
+        local dockerfile="$(dirname "$0")/../../docker/Dockerfile"
         if [ -f "$dockerfile" ]; then
             sed -i.bak \
                 "s/ENV JAVA_OPTS=.*/ENV JAVA_OPTS=\"-Xms$xms_setting -Xmx$xmx_setting -XX:+UseG1GC -XX:+UnlockExperimentalVMOptions -XX:MaxGCPauseMillis=100 -XX:+DisableExplicitGC -XX:TargetSurvivorRatio=90 -XX:G1NewSizePercent=50 -XX:G1MaxNewSizePercent=80 -XX:G1MixedGCLiveThresholdPercent=35 -XX:+AlwaysPreTouch -XX:+ParallelRefProcEnabled -Dusing.aikars.flags=https:\/\/mcflags.emc.gs -Daikars.new.flags=true\"/" \
@@ -400,7 +400,7 @@ check_system_performance() {
 generate_performance_report() {
     echo "📊 生成效能最佳化報告..."
     
-    local report_file="$(dirname "$0")/../logs/optimization_report_$(date +%Y%m%d_%H%M%S).txt"
+    local report_file="$(dirname "$0")/../../logs/optimization_report_$(date +%Y%m%d_%H%M%S).txt"
     
     {
         echo "═══════════════════════════════════════"

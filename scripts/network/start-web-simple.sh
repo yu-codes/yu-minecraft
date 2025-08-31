@@ -10,8 +10,44 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m'
 
+# 處理參數
+if [[ "$1" == "stop" ]]; then
+    exec "$(dirname "$0")/stop-web-simple.sh"
+fi
+
+if [[ "$1" == "status" ]]; then
+    echo -e "${BLUE}📊 Web 服務狀態${NC}"
+    echo "==============================="
+    
+    if [ -f /tmp/yu-minecraft-api.pid ] && ps -p $(cat /tmp/yu-minecraft-api.pid) > /dev/null; then
+        echo -e "${GREEN}✅ API 服務運行中 (PID: $(cat /tmp/yu-minecraft-api.pid))${NC}"
+    else
+        echo -e "${RED}❌ API 服務未運行${NC}"
+    fi
+    
+    if [ -f /tmp/yu-minecraft-web.pid ] && ps -p $(cat /tmp/yu-minecraft-web.pid) > /dev/null; then
+        echo -e "${GREEN}✅ Web 服務運行中 (PID: $(cat /tmp/yu-minecraft-web.pid))${NC}"
+    else
+        echo -e "${RED}❌ Web 服務未運行${NC}"
+    fi
+    
+    exit 0
+fi
+
 echo -e "${BLUE}🌐 Yu Minecraft 輕量級 Web 管理系統${NC}"
 echo "================================================"
+
+# 檢查服務是否已經運行
+if [ -f /tmp/yu-minecraft-api.pid ] && ps -p $(cat /tmp/yu-minecraft-api.pid) > /dev/null 2>&1; then
+    echo -e "${YELLOW}⚠️  API 服務已經在運行中${NC}"
+    if [ -f /tmp/yu-minecraft-web.pid ] && ps -p $(cat /tmp/yu-minecraft-web.pid) > /dev/null 2>&1; then
+        echo -e "${YELLOW}⚠️  Web 服務也已經在運行中${NC}"
+        echo -e "${GREEN}✅ 所有服務都已啟動${NC}"
+        echo "   🏠 本地訪問: http://localhost:8080"
+        echo "   📡 API 端點: http://localhost:5001/api"
+        exit 0
+    fi
+fi
 
 # 檢查 Python
 if ! command -v python3 &> /dev/null; then
@@ -45,7 +81,7 @@ fi
 
 # 啟動簡單的 HTTP 服務器來提供靜態檔案
 echo -e "${YELLOW}🌐 啟動 Web 服務器...${NC}"
-python3 -m http.server 8081 &
+python3 -m http.server 8080 &
 WEB_PID=$!
 
 # 等待 Web 服務啟動
@@ -68,8 +104,8 @@ echo ""
 echo -e "${GREEN}🎉 服務啟動成功！${NC}"
 echo "================================================"
 echo -e "${BLUE}📱 Web 管理介面:${NC}"
-echo "   🏠 本地訪問: http://localhost:8081"
-echo "   🌐 區域網路: http://$(hostname -I | awk '{print $1}' 2>/dev/null || echo 'localhost'):8081"
+echo "   🏠 本地訪問: http://localhost:8080"
+echo "   🌐 區域網路: http://$(ifconfig | grep "inet " | grep -v 127.0.0.1 | awk '{print $2}' | head -1):8080"
 echo ""
 echo -e "${BLUE}🔧 API 服務:${NC}"
 echo "   📡 API 端點: http://localhost:5001/api"
@@ -84,11 +120,11 @@ echo ""
 if [[ "$1" != "--no-browser" ]]; then
     echo -e "${YELLOW}🌐 正在開啟瀏覽器...${NC}"
     if command -v open &> /dev/null; then
-        open http://localhost:8081
+        open http://localhost:8080
     elif command -v xdg-open &> /dev/null; then
-        xdg-open http://localhost:8081
+        xdg-open http://localhost:8080
     else
-        echo "請手動開啟瀏覽器並訪問: http://localhost:8081"
+        echo "請手動開啟瀏覽器並訪問: http://localhost:8080"
     fi
 fi
 

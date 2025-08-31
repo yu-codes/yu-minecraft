@@ -223,6 +223,105 @@ continuous_monitor() {
     done
 }
 
+# 踢除玩家
+kick_player() {
+    local player_name="$1"
+    
+    if [ -z "$player_name" ]; then
+        echo "❌ 錯誤: 請指定要踢除的玩家名稱"
+        echo "使用方式: $0 kick <玩家名稱>"
+        exit 1
+    fi
+    
+    echo "🚪 正在踢除玩家: $player_name"
+    
+    cd "$(dirname "$0")/../../docker"
+    
+    # 檢查伺服器是否在線
+    if ! docker compose ps | grep -q "Up"; then
+        echo "❌ 錯誤: 伺服器未運行"
+        exit 1
+    fi
+    
+    # 執行踢除指令
+    echo "📡 發送踢除指令..."
+    
+    # 使用 Python RCON 客戶端 (絕對路徑)
+    local rcon_script="/Users/yuhan/Side-Project/yu-minecraft/scripts/monitoring/rcon_client.py"
+    local rcon_result=$(python3 "$rcon_script" "kick $player_name" 2>&1)
+    local rcon_exit_code=$?
+    
+    if [ $rcon_exit_code -eq 0 ]; then
+        echo "✅ 成功: 玩家 $player_name 已被踢除"
+        echo "📋 伺服器回應: $rcon_result"
+        
+        # 記錄到監控日誌
+        local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+        echo "[$timestamp] ACTION: 玩家 $player_name 被踢除" >> "$MONITOR_LOG"
+        
+        # 等待一下再檢查玩家是否真的被踢除
+        echo "🔍 驗證踢除結果..."
+        sleep 2
+        local verify_result=$(python3 "$rcon_script" "list" 2>&1)
+        if [[ "$verify_result" != *"$player_name"* ]]; then
+            echo "✅ 確認: 玩家 $player_name 已不在線上"
+        else
+            echo "⚠️  警告: 玩家可能仍在線上，請檢查"
+        fi
+    else
+        echo "❌ 錯誤: 踢除玩家失敗"
+        echo "📋 錯誤詳情: $rcon_result"
+        echo "可能原因:"
+        echo "  - 玩家不在線上"
+        echo "  - 玩家名稱錯誤"
+        echo "  - RCON 連接失敗"
+        echo "  - 伺服器未啟用 RCON"
+        exit 1
+    fi
+}
+
+# 封禁玩家
+ban_player() {
+    local player_name="$1"
+    
+    if [ -z "$player_name" ]; then
+        echo "❌ 錯誤: 請指定要封禁的玩家名稱"
+        echo "使用方式: $0 ban <玩家名稱>"
+        exit 1
+    fi
+    
+    echo "🚫 正在封禁玩家: $player_name"
+    
+    cd "$(dirname "$0")/../../docker"
+    
+    # 檢查伺服器是否在線
+    if ! docker compose ps | grep -q "Up"; then
+        echo "❌ 錯誤: 伺服器未運行"
+        exit 1
+    fi
+    
+    # 執行封禁指令
+    echo "📡 發送封禁指令..."
+    
+    # 使用 Python RCON 客戶端 (絕對路徑)
+    local rcon_script="/Users/yuhan/Side-Project/yu-minecraft/scripts/monitoring/rcon_client.py"
+    local rcon_result=$(python3 "$rcon_script" "ban $player_name" 2>&1)
+    local rcon_exit_code=$?
+    
+    if [ $rcon_exit_code -eq 0 ]; then
+        echo "✅ 成功: 玩家 $player_name 已被封禁"
+        echo "📋 伺服器回應: $rcon_result"
+        
+        # 記錄到監控日誌
+        local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+        echo "[$timestamp] ACTION: 玩家 $player_name 被封禁" >> "$MONITOR_LOG"
+    else
+        echo "❌ 錯誤: 封禁玩家失敗"
+        echo "📋 錯誤詳情: $rcon_result"
+        exit 1
+    fi
+}
+
 # 主程式
 case "${1:-once}" in
     "once")
@@ -234,14 +333,22 @@ case "${1:-once}" in
     "logs")
         show_logs
         ;;
+    "kick")
+        kick_player "$2"
+        ;;
+    "ban")
+        ban_player "$2"
+        ;;
     "help"|"-h"|"--help")
-        echo "使用方式: $0 [once|continuous|logs|help]"
+        echo "使用方式: $0 [once|continuous|logs|kick|ban|help]"
         echo ""
         echo "選項:"
-        echo "  once       執行一次監控檢查 (預設)"
-        echo "  continuous 連續監控模式"
-        echo "  logs       顯示監控記錄"
-        echo "  help       顯示此說明"
+        echo "  once           執行一次監控檢查 (預設)"
+        echo "  continuous     連續監控模式"
+        echo "  logs           顯示監控記錄"
+        echo "  kick <玩家>    踢除指定玩家"
+        echo "  ban <玩家>     封禁指定玩家"
+        echo "  help           顯示此說明"
         ;;
     *)
         echo "❌ 未知選項: $1"

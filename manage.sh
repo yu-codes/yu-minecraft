@@ -67,17 +67,19 @@ show_main_menu() {
     echo " 10) 即時監控"
     echo " 11) 效能分析"
     echo " 12) 執行效能最佳化"
+    echo " 13) 查看玩家資訊"
     echo ""
     echo -e "${PURPLE}🔌 外掛管理${NC}"
-    echo " 13) 外掛管理選單"
+    echo " 14) 外掛管理選單"
     echo ""
     echo -e "${CYAN}💾 備份與維護${NC}"
-    echo " 14) 備份當前世界"
-    echo " 15) 查看備份列表"
+    echo " 15) 備份當前世界"
+    echo " 16) 查看備份列表"
     echo ""
     echo -e "${RED}🌐 網路管理${NC}"
-    echo " 16) 啟動Web管理介面"
-    echo " 17) 網路連線設定"
+    echo " 17) 啟動Web管理介面"
+    echo " 18) 停止Web管理介面"
+    echo " 19) 網路連線設定"
     echo ""
     echo " 0) 退出"
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -161,7 +163,7 @@ main() {
         show_title
         show_main_menu
         
-        read -p "請選擇操作 [0-17]: " choice
+        read -p "請選擇操作 [0-19]: " choice
         
         echo ""
         
@@ -224,21 +226,40 @@ main() {
                 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
                 run_script "$SCRIPTS_DIR/monitoring/optimize.sh" all
                 ;;
+            13)
+                echo -e "${BLUE}👥 玩家資訊查詢${NC}"
+                echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+                echo "1) 查看線上玩家"
+                echo "2) 查看所有已知玩家"
+                echo "3) JSON格式輸出線上玩家"
+                echo "0) 返回主選單"
+                echo ""
+                read -p "請選擇操作 [0-3]: " player_choice
+                
+                case $player_choice in
+                    1) run_script "$SCRIPTS_DIR/monitoring/player-info.sh" online ;;
+                    2) run_script "$SCRIPTS_DIR/monitoring/player-info.sh" all ;;
+                    3) run_script "$SCRIPTS_DIR/monitoring/player-info.sh" json ;;
+                    0) echo "返回主選單" ;;
+                    *) echo -e "${RED}❌ 無效選項${NC}" ;;
+                esac
+                ;;
             
             # 🔌 外掛管理
-            13) plugin_menu ;;
+            14) plugin_menu ;;
             
             # 💾 備份與維護
-            14) run_script "$SCRIPTS_DIR/backup/backup.sh" ;;
-            15) 
+            15) run_script "$SCRIPTS_DIR/backup/backup.sh" ;;
+            16) 
                 echo -e "${BLUE}📋 備份列表${NC}"
                 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
                 ls -la backups/ 2>/dev/null || echo "尚無備份檔案"
                 ;;
             
             # 🌐 網路管理
-            16) run_script "$SCRIPTS_DIR/network/start-web-simple.sh" ;;
-            17) network_menu ;;
+            17) run_script "$SCRIPTS_DIR/network/start-web-simple.sh" ;;
+            18) run_script "$SCRIPTS_DIR/network/stop-web-simple.sh" ;;
+            19) network_menu ;;
             
             0)
                 echo -e "${GREEN}👋 感謝使用 Yu Minecraft Server 管理系統！${NC}"
@@ -249,7 +270,7 @@ main() {
                 ;;
         esac
         
-        if [ $choice -ne 13 ] && [ $choice -ne 17 ]; then
+        if [ $choice -ne 14 ] && [ $choice -ne 19 ]; then
             echo ""
             read -p "按Enter繼續..."
         fi

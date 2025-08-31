@@ -164,10 +164,50 @@
             padding: 8px 12px;
             font-size: 0.9rem;
             min-width: auto;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .btn-secondary:hover {
             background: linear-gradient(45deg, #5a6268, #3d4145);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .btn-refresh {
+            background: linear-gradient(45deg, #17a2b8, #138496);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 6px rgba(23, 162, 184, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-refresh:hover {
+            background: linear-gradient(45deg, #138496, #0f6674);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(23, 162, 184, 0.4);
+        }
+
+        .btn-refresh:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-refresh .fa-sync-alt {
+            transition: transform 0.3s ease;
+        }
+
+        .btn-refresh:hover .fa-sync-alt {
+            transform: rotate(180deg);
         }
 
         /* 通知樣式 */
@@ -397,8 +437,9 @@
                             <i class="fas fa-users"></i>
                             <h3 style="display: inline; margin: 0;">線上玩家</h3>
                         </div>
-                        <button class="btn-secondary" onclick="refreshPlayerList()" title="重新整理玩家列表">
+                        <button class="btn-refresh" onclick="refreshPlayerList()" title="重新整理玩家列表">
                             <i class="fas fa-sync-alt"></i>
+                            <span>重新整理</span>
                         </button>
                     </div>
                 </div>
@@ -669,9 +710,7 @@
                     }
                     
                     // 更新系統資源
-                    if (data.system_resources) {
-                        updateSystemResources(data.system_resources);
-                    }
+                    updateSystemResources(data);
                     
                     // 更新時間戳
                     const lastUpdateElement = document.getElementById('last-update');
@@ -799,32 +838,52 @@
             }, duration);
         }
 
-        function updateSystemResources(resources) {
+        function updateSystemResources(data) {
+            // 從回應數據中獲取 system_resources
+            const resources = data && data.system_resources ? data.system_resources : data;
             if (!resources) return;
             
+            console.log('更新系統資源:', resources); // 除錯用
+            
             // 更新 CPU 使用率
-            const cpuProgress = document.querySelector('.resource-item:nth-child(1) .progress-fill');
             const cpuText = document.getElementById('cpu-usage');
+            const cpuProgress = cpuText ? cpuText.closest('.resource-item').querySelector('.progress-fill') : null;
             if (cpuProgress && cpuText && typeof resources.cpu_usage === 'number') {
-                cpuProgress.style.width = `${resources.cpu_usage}%`;
-                cpuText.textContent = `${resources.cpu_usage}%`;
+                const cpuValue = Math.min(Math.max(resources.cpu_usage, 0), 100);
+                cpuProgress.style.width = `${cpuValue}%`;
+                cpuText.textContent = `${cpuValue}%`;
+                console.log(`CPU更新: ${cpuValue}%`);
             }
             
             // 更新記憶體使用率
-            const memoryProgress = document.querySelector('.resource-item:nth-child(2) .progress-fill');
             const memoryText = document.getElementById('memory-usage');
+            const memoryProgress = memoryText ? memoryText.closest('.resource-item').querySelector('.progress-fill') : null;
             if (memoryProgress && memoryText && typeof resources.memory_usage === 'number') {
-                memoryProgress.style.width = `${resources.memory_usage}%`;
-                memoryText.textContent = `${resources.memory_usage}%`;
+                const memoryValue = Math.min(Math.max(resources.memory_usage, 0), 100);
+                memoryProgress.style.width = `${memoryValue}%`;
+                memoryText.textContent = `${memoryValue}%`;
+                console.log(`記憶體更新: ${memoryValue}%`);
             }
             
             // 更新磁盤使用率
-            const diskProgress = document.querySelector('.resource-item:nth-child(3) .progress-fill');
             const diskText = document.getElementById('disk-usage');
-            if (diskProgress && diskText && resources.disk_info && resources.disk_info.disk_usage_percent) {
-                const diskPercent = parseInt(resources.disk_info.disk_usage_percent.replace('%', ''));
+            const diskProgress = diskText ? diskText.closest('.resource-item').querySelector('.progress-fill') : null;
+            if (diskProgress && diskText) {
+                let diskPercent = 0;
+                
+                // 從 disk_info.disk_usage_percent 讀取
+                if (resources.disk_info && resources.disk_info.disk_usage_percent) {
+                    diskPercent = parseInt(resources.disk_info.disk_usage_percent.replace('%', ''));
+                }
+                // 從 system_info.disk_usage_percent 讀取 (向後兼容)
+                else if (data && data.system_info && data.system_info.disk_usage_percent) {
+                    diskPercent = parseInt(data.system_info.disk_usage_percent.replace('%', ''));
+                }
+                
+                diskPercent = Math.min(Math.max(diskPercent, 0), 100);
                 diskProgress.style.width = `${diskPercent}%`;
                 diskText.textContent = `${diskPercent}%`;
+                console.log(`磁碟更新: ${diskPercent}%`);
             }
         }
 

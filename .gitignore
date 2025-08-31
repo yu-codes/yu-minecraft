@@ -25,9 +25,12 @@ replay_pid*
 
 # Minecraft伺服器檔案
 worlds/
+worlds/*
+!worlds/.gitkeep
 logs/
 crash-reports/
 debug/
+
 
 # 備份檔案
 backups/
